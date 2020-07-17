@@ -6,6 +6,8 @@ gitea 는 제가 직접 설치하지 않아서 설치 과정은 생략합니다.
 - 설치 후 가장 최초 생성된 사용자가 사이트 관리자가 됩니다(!).
 - 이후 관리자가 다른 사용자들을 관리자로 지정할 수 있습니다.
 
+## gitea keycloak 인증 설정
+
 gitea 가 keycloak 인증으로 로그인 가능케 하려면 관리자가 다음을 설정해야 합니다:
 - gitea ingress 설정이 되어 https://gitea.skmta.net 으로 접속 된다고 가정
 - keycloak에서
@@ -27,4 +29,22 @@ gitea 가 keycloak 인증으로 로그인 가능케 하려면 관리자가 다�
 이렇게 하고 로그인 화면에서
 ![login_form](https://github.com/anabaral/aws-etude/blob/master/gitea_openid_connect_form.png)
 아래의 버튼을 클릭하여 keycloak 제공하는 로그인 화면으로 넘어가면 성공.
+
+## gitea에 샘플 프로그램 등록
+
+gitea에 등록할 만만한 프로젝트로 js-console 을 사용해 보겠습니다.
+
+일단 배스티온에서 소스를 구해오고 git 정보를 지웁니다
+<pre><code>$ git clone https://github.com/anabaral/keycloak-containers-demo/tree/master/js-console 
+$ rm -rf ./.git
+</code></pre>
+
+이제 gitea에 commit/push 해봅시다.
+<pre><code>$ git init
+$ git add .
+$ git commit -m 'initial'
+$ git remote add origin https://gitea.skmta.net/skmta/js-console
+$ git push origin master
+</code></pre>
+
 
