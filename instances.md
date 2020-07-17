@@ -50,7 +50,9 @@ aws autoscaling  update-auto-scaling-group --auto-scaling-group-name ${AG_NAME_M
 
 ※ 한편, 배스티온으로 쓰는 EC2에 jq 정도는 기본으로 깔려 있더군요. 아니었으면 따로 깔아줘야 합니다.
 
-
+위의 쉘을 cron으로 등록해서 배스티온 서버를 제외한 EKS 인스턴스들은 꺼주었습니다.
+본래 EKS 서버그룹에 매일 껐다 켜는 설정을 할 수 있는데 
+주말에도 꺼둔다거나 필요할 때 잠깐 켜서 사용하려면 이렇게 만드는 편이 낫겠더군요.
 
 
 
