@@ -1,0 +1,30 @@
+# jenkins 와 gitea 설정
+
+gitea 는 제가 직접 설치하지 않아서 설치 과정은 생략합니다. 다만 몇 가지 특징만 적어두겠습니다.
+- gitea 는 기본설정으로 시작하면 회원가입 요청을 하면 그냥 사용자가 생성됩니다. 
+  (이걸 막으려면 관리자가 Disable Self-Registration 옵션을 켜야 함)
+- 설치 후 가장 최초 생성된 사용자가 사이트 관리자가 됩니다(!).
+- 이후 관리자가 다른 사용자들을 관리자로 지정할 수 있습니다.
+
+gitea 가 keycloak 인증으로 로그인 가능케 하려면 관리자가 다음을 설정해야 합니다:
+- gitea ingress 설정이 되어 https://gitea.skmta.net 으로 접속 된다고 가정
+- keycloak에서
+  * ci realm 에 client 추가 : gitea
+  * 이 때 url을 https://gitea.skmta.net 로 지정
+  * Settings 탭에서 
+    - Access Type : confidential 로 지정, 이렇게 하면 Credentials 탭이 나옴
+    - client id 복사해 둠
+  * Credentials 탭에서
+    - Client Authenticator : client id and secret
+    - secret 아이디를 복사해 둠
+- gitea에서
+  * Site Administration 메뉴 - Authentication Sources 탭 - [Add Authentication Source] 버튼
+  * 인증이름: keycloak
+  * OAuth2 Provider: OpenID Connect
+  * client id, secret 입력
+  * auto discovery url : https://keycloak.skmta.net/auth/realms/ci/.well-known/openid-configuration
+
+이렇게 하고 로그인 화면에서
+![login_form](https://github.com/anabaral/aws-etude/blob/master/gitea_openid_connect_form.png)
+아래의 버튼을 클릭하여 keycloak 제공하는 로그인 화면으로 넘어가면 성공.
+
