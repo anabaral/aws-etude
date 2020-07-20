@@ -62,6 +62,7 @@ $ git push origin master
   </code></pre>
   다른 건 달라질 게 없고, 웹페이지에서 다른 도메인의 사이트 (keycloak 사이트)로부터 몇몇 파일을 호출해야 하는데 
   그게 브라우저에 따라서는 CORS 위반으로 안받아집니다. 이걸 허용하려면 서버에서 "괜찮아 헤더" 를 보내줘야 합니다.
+  위의 RUN 구절이 그 역할을 담당합니다.
 - index.html
   <pre><code>https://keycloak.k8s.com:32443/... --> https://keycloak.skmta.net/...</code></pre>
 - keycloak.json
@@ -213,7 +214,46 @@ spec:
 </code></pre>
 
 ## jenkins 프로젝트 설정
+다음과 같이 설정합니다:
+* 로그인 후 홈 화면에서 '새로운 Item' 선택
+* item 이름을 'js-console' 로 정하고 유형은 Pipeline 으로 선택
+* 구성화면이 나오면
+  - General 항목은 모두 비우고
+  - Build Triggers 항목에선 PollSCM을 체크, 내용은 채우지 말고
+  - Pipeline 항목은 'Pipeline Script from SCM' 을 선택 후
+    . SCM = Git, 
+    . Repositories = https://gitea.skmta.net/skmta/js-console.git , 
+    . Credential은 본래 줘야 하는데, 현재는 Gitea가 anonymous read를 허용하므로 비워둠
+    . Scriptpath = Jenkinsfile
+    . 저장, Apply
+위에서 PollSCM을 체크하고 내용을 채우면 그 내용에 따라 Poll을 하는 반면 내용을 비워두면 Gitea Webhook 설정에 의해 "깨워질 때" 체크아웃이 수행됩니다.
 
+## gitea webhook 설정
 
+js-console 프로젝트에 가면 (그 관리권한을 가지고 있다면) '설정'메뉴에 접근할 수 있습니다.
+
+Webhook이라는 탭에 들어가서 'Webhook 추가' - 'Gitea' 를 선택합니다.
+* Target URL = https://jenkins.skmta.net/gitea-webhook/post?job=js-console
+* HTTP Method = POST
+* POST Content Type = application/json
+* Trigger On = Push Events
+* Active 체크
+
+이제 해당 프로젝트에 어떤 변경이 생길 때마다 jenkins build가 가동될 것입니다. 
 
 ## ingress (js-console 접속용) 설정
+
+빌드배포가 되는 것과 js-console 앱에 접근되는 것은 별개입니다. 적절한 인그레스 설정을 해 주어야 합니다.
+js-console은 mta-dev 네임스페이스에 디플로이 되는데, 여기 이미 기존에 사용중인 인그레스가 있으므로 여기에 통합시키도록 하죠.
+다음을 "잘" 삽입합시다.
+<pre><code>$ kubectl edit ing -n mta-dev __<기존_ingress_이름>__
+...
+  - host: js-console.skmta.net
+    http:
+      paths:
+      - backend:
+          serviceName: js-console
+          servicePort: 8000
+...
+</code></pre>
+
