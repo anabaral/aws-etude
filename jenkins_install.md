@@ -7,7 +7,8 @@ ingress 등 들어가야 하는 항목이 복잡하여 values.yaml 파일을 먼
 namespaceOverride: mta-cicd
 master:
   adminPassword: <정해둔_비번>
-  additionalPlugins: ["keycloak:2.3.0", "gitea:1.2.1", "credentials-binding:1.23", "docker-workflow:1.23"]
+  installPlugins: ["credentials-binding:1.23"]
+  additionalPlugins: ["keycloak:2.3.0", "gitea:1.2.1", "docker-workflow:1.23"]
   ingress:
     enabled: true
     hostName: jenkins.skmta.net
@@ -28,8 +29,29 @@ persistence:
 
 아무튼 설치해 봅시다:
 <pre><code>$ helm install jenkins -n mta-cicd -f jenkins-values.yaml stable/jenkins
+NAME: jenkins
+LAST DEPLOYED: Mon Jul 27 09:03:31 2020
+NAMESPACE: mta-cicd
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get your 'admin' user password by running:
+  printf $(kubectl get secret --namespace mta-cicd jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
+2. Get the Jenkins URL to visit by running these commands in the same shell:
+  export POD_NAME=$(kubectl get pods --namespace mta-cicd -l "app.kubernetes.io/component=jenkins-master" -l "app.kubernetes.io/instance=jenkins" -o jsonpath="{.items[0].metadata.name}")
+  echo http://127.0.0.1:8080
+  kubectl --namespace mta-cicd port-forward $POD_NAME 8080:8080
+
+3. Login with the password from step 1 and the username: admin
+
+4. Use Jenkins Configuration as Code by specifying configScripts in your values.yaml file, see documentation: http:///configuration-as-code and examples: https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos
+
+For more information on running Jenkins on Kubernetes, visit:
+https://cloud.google.com/solutions/jenkins-on-container-engine
+For more information about Jenkins Configuration as Code, visit:
+https://jenkins.io/projects/jcasc/
 </code></pre>
-설치를 성공했다면 길게 설명 메시지가 나옵니다. 관리자(admin) 비번을 정하지 않았다면 여기에 비번을 얻는 방법이 기술됩니다.
+길게 설명 메시지가 나옵니다. 관리자(admin) 비번을 정하지 않았다면 여기에 비번을 얻는 방법이 기술됩니다.
 
 AWS Load balancer 및 Route53 설정을 끝내면 잠시 후 접속이 가능해집니다. (이건 따로 설명하지 않습니다)
 
