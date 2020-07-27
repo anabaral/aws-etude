@@ -24,7 +24,8 @@ $ helm repo add codecentric https://codecentric.github.io/helm-charts  # for key
 mariadb 먼저 설치해 보죠.
 <pre><code>$ helm install keycloak-mariadb -n keycloak bitnami/mariadb --set global.storageClass=gp2 \
      --set db.name=keycloakdb  --set db.user=keycloak  --set db.password=keycloak
-     --set master.persistence.mountPath=/opt/bitnami/mariadb
+#     --set master.persistence.mountPath=/opt/bitnami/mariadb
+#  마지막 한 줄은 불필요. 특정 버전의 이미지에서 문제가 되어 고쳤던 건데 현재는 오히려 기본값이어야 제대로 동작함 (스크립트에 박혀 있음) 
 
 NAME: keycloak-mariadb
 LAST DEPLOYED: Thu Jul  2 08:42:45 2020
