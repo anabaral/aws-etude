@@ -79,7 +79,7 @@ Jenkins에 로그인해서 우선 필요한 설정을 합니다:
 뭔가 잘못하고 있는 느낌인데 2020년 7월 현재까지의 버전은 그러합니다.
 이걸 영속화 하기 위해 Configmap 을 수정합시다:
 <pre><code>$ kubectl get cm -n jenkins jenkins-jenkins-jcasc-config -o yaml > jenkins-jenkins-jcasc-config-cm.yaml
-vi jenkins-jenkins-jcasc-config-cm.yaml # 내용이 json으로 되어 있는데 yaml format으로 바꾸어서 표현했음. 바꾸어서 수정해도 되고 json 그대로 수정해도 됩니다.
+vi jenkins-jenkins-jcasc-config-cm.yaml 
   jcasc-default-config.yaml: |-
     jenkins:
       authorizationStrategy: legacy
@@ -91,9 +91,13 @@ vi jenkins-jenkins-jcasc-config-cm.yaml # 내용이 json으로 되어 있는데 
     unclassified:
       location:
         url: https://jenkins.skmta.net"
+# 내용이 escape character를 포함한 문자열로 되어 있는데 yaml format으로 얻어 표현했음. 바꾸어서 수정해도 되고 문자열을 그대로 수정해도 됩니다.
+# 참고로 이걸 yaml 문서 그대로 얻는 방법은 다음과 같습니다:
+# kubectl get cm -n mta-infra jenkins-jenkins-jcasc-config -o jsonpath="{.data['jcasc-default-config\.yaml']}"
 </code></pre>
 
 여기까지 하면 재시작 해도 keycloak 인증을 계속 요구할 겁니다.
+
 
 아직 아쉬운 것은 권한관리 방식인 legacy 입니다. 이 방식은 심플하게
 - admin 권한이 부여되면 관리자
