@@ -126,8 +126,32 @@ keycloak:
 
 준비가 되었으니 설치합니다.
 <pre><code>helm install keycloak -n keycloak -f keycloak-values.yaml codecentric/keycloak
+NAME: keycloak
+LAST DEPLOYED: Mon Jul 27 05:55:27 2020
+NAMESPACE: keycloak
+STATUS: deployed
+REVISION: 1
+NOTES:
+Keycloak can be accessed:
+
+* Within your cluster, at the following DNS name at port 80:
+
+  keycloak-http.keycloak.svc.cluster.local
+
+* From outside the cluster, run these commands in the same shell:
+
+  export POD_NAME=$(kubectl get pods --namespace keycloak -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:8080 to use Keycloak"
+  kubectl port-forward --namespace keycloak $POD_NAME 8080
+
+Login with the following credentials:
+Username: keycloak
+
+To retrieve the initial user password run:
+kubectl get secret --namespace keycloak keycloak-http -o jsonpath="{.data.password}" | base64 --decode; echo
+
 </code></pre>
-출력 메시지가 있었던 것 같은데 갈무리를 까먹어서 생략.
+
 
 ## optional: 테마 추가를 위한 설정
 
