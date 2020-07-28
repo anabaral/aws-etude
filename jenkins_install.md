@@ -8,7 +8,7 @@ namespaceOverride: mta-cicd
 master:
   adminPassword: <정해둔_비번>
   installPlugins: ["credentials-binding:1.23"]
-  additionalPlugins: ["keycloak:2.3.0", "gitea:1.2.1", "docker-workflow:1.23"]
+  additionalPlugins: ["keycloak:2.3.0", "gitea:1.2.1", "docker-workflow:1.23", "kubernetes:1.25.7"]
   ingress:
     enabled: true
     hostName: jenkins.skmta.net
