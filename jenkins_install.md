@@ -76,8 +76,11 @@ Jenkins에 로그인해서 우선 필요한 설정을 합니다:
 그렇습니다. 위의 설정이 유지가 되지 않습니다. 최신 버전의 jenkins는 Configuration as Code 기능을 내장하고 있는데
 우습게도 이 설정 일부가 ConfigMap 으로 적용되고 있어요. 
 그래서 어느 설정은 재시작 해도 변경된 채로 남고 어느 설정은 재시작하면 리셋됩니다.
-뭔가 잘못하고 있는 느낌인데 2020년 7월 현재까지의 버전은 그러합니다.
-이걸 영속화 하기 위해 Configmap 을 수정합시다:
+뭔가 잘못하고 있는 느낌인데 2020년 7월 현재까지의 버전은 그러합니다. 
+
+2020-07-28 현재 뭔가 잘못된 걸 알아차렸는지 바꾼 것 같아요. stable/jenkins 2.1.0 버전에는 Configuration as Code 기능을 오픈하지 않아서 재시작해도 괜찮습니다.
+
+(아무튼 여기선 문제가 있다는 가정하에) 이걸 영속화 하기 위해 Configmap 을 수정합시다:
 <pre><code>$ kubectl get cm -n jenkins jenkins-jenkins-jcasc-config -o yaml > jenkins-jenkins-jcasc-config-cm.yaml
 vi jenkins-jenkins-jcasc-config-cm.yaml 
   jcasc-default-config.yaml: |-
