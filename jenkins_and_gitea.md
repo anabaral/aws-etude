@@ -257,3 +257,26 @@ js-console은 mta-dev 네임스페이스에 디플로이 되는데, 여기 이�
 ...
 </code></pre>
 
+## Troubleshooting
+
+Troubleshooting 은 경우에 따라 이걸 읽는 사람에게 해당 될 수도 있고 안될 수도 있는 문제해결 케이스입니다.
+
+### 클라우드 설정에서 jenkins-agent 설정
+
+처음 jenkins를 설치했을 때는 생기지 않던 문제가 갑자기 생겼습니다. 증상은 파이프라인에서 실행이 무한히 지연되는 것이었는데,
+로그를 보면 Jenkinsfile 수행할 때 jnlp 컨테이너가 뜨자마자 다시 죽습니다. (위의 Jenkinsfile 을 보면 알겠지만 jnlp 컨테이너는
+제가 선언하지 않았지만 기본으로 뜹니다) 진짜 문제의 원인을 알려면 jnlp 컨테이너 로그를 들여다 봐야 하는데 이게 너무 금방 죽어서
+제대로 얻지 못하거나 로그가 나와도 '이게 전부야? 더 없어?' 식으로 파악이 안되었습니다. 
+
+결국 여러 가지 꼼수로 얻어낸 결론은 다름아닌 설정상의 문제였습니다.
+![jenkins_agent_config](https://github.com/anabaral/aws-etude/blob/master/configure-clouds-jenkins-agent.png)
+위에서처럼 URL 형식이 아니어야 할 입력값을 URL 형식으로 넣었다고 에러가 났었습니다.
+
+그럼 처음 설치했을 때는 왜 괜찮았을까?
+
+현재 설치 중인 jenkins 차트는 jenkins를 항상 최신 이미지로 설치하게 되어 있습니다. 처음 설치했을 때는 'configuration as code' 기능이 포함된 채의
+jenkins였고요. 제 다른 글을 보면 아시겠지만 그 기능 때문인지 그 기능에 맞춘 설정의 부작용 때문인지 Jenkins UI에서 설정했던 값들이 POD 재시작 시
+<code>jenkins-jenkins-jcasc-config</code> ConfigMap 의 내용에 의해 덮어써집니다.
+이걸 해결해 주기 위해서는 UI에서 설정했던 내용에 대응되는 해당 ConfigMap의 내용을 같이 고쳐줘야 했습니다.<br>
+다행히도 엊그제 설치한 jenkins는 이 기능이 빠져 있었습니다. 대신에 그 ConfigMap에 있던 내용의 JenkinsTunnel 같은 몇몇 항목이 빈간으로 남아있게 되었고
+시행착오 끝에 그 항목을 채우기는 했지만 형식이 맞지 않았던 겁니다.
