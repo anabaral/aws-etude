@@ -3,13 +3,14 @@
 그래서 안쓰는 시간에는 과감히 인스턴스를 내리는 식으로 절감을 시도해 봅시다. 과연 잘 될까?
 
 현재 우리의 클러스터는 클러스터 관리용 노드그룹이 만들어져 있지 않고 따로 EC2 스케일링 그룹으로 지정해 두었습니다.
-그래서 이걸 가지고 해봅시다.
+EC2 스케일링 그룹 설정에도 자동으로 그룹 크기를 조절하는 방법이 있습니다만,
+여기서는 쉘과 cron 으로 해 보겠습니다.
 
 # AWS EKS 인스턴스 내리기
 
 미리 AWS EKS에 해당하는 스케일그룹의 상태를 알아둡니다.
 
-다음과 같이 수행합니다 (stop-elk-instances.sh) :
+다음과 같이 수행합니다 (stop-ek-instances.sh) :
 <pre><code>#!/bin/sh
 
 WORKER_NG_NAME=eksctl-mta-cluster-nodegroup-mta-worker-ng
@@ -48,12 +49,44 @@ aws autoscaling  update-auto-scaling-group --auto-scaling-group-name ${AG_NAME_M
 
 ※ 위에서 <code>--min-size</code>, <code>--max-size</code>, <code>--desired-capacity</code> 값들은 기존에 있는 값들을 기억해서 적어 주어야 합니다.
 
-※ 한편, 배스티온으로 쓰는 EC2에 jq 정도는 기본으로 깔려 있더군요. 아니었으면 따로 깔아줘야 합니다.
+※ 한편, 배스천으로 쓰는 EC2에 jq 정도는 기본으로 깔려 있더군요. 아니었으면 따로 깔아줘야 합니다.
 
-위의 쉘을 cron으로 등록해서 배스티온 서버를 제외한 EKS 인스턴스들은 꺼주었습니다.
-본래 EKS 서버그룹에 매일 껐다 켜는 설정을 할 수 있는데 
-주말에도 꺼둔다거나 필요할 때 잠깐 켜서 사용하려면 이렇게 만드는 편이 낫겠더군요.
+이제 이를 cron으로 등록해 보았습니다:
+```
+[selee@ip-192-168-2-94 ~]$ crontab -l
+0 12 * * * /home/selee/instances_manage/stop-eks-instances.sh   2>&1 >> /home/selee/instances_manage/manage.log
+30 23 * * 0-4 /home/selee/instances_manage/start-eks-instances.sh   2>&1 >> /home/selee/instances_manage/manage.log
+```
+배스천 서버의 타임존이 UTC 기준인 것을 바꾸지 않아서 좀 오해하기 쉽게 설정하게 되었는데, 골자는 이렇습니다:
+* 매일 오후 9시에 모든 떠 있는 EKS 인스턴스를 종료합니다. (종료 = 인스턴스를 없앰)
+* 평일 아침 8시 30분에 모든 EKS 인스턴스를 본래의 설정으로 띄웁니다.
 
+여기에 더하여 다음과 같이 이벤트 수행마다 slack notification 하도록 설정하였습니다:
+```
+[selee@ip-192-168-2-94 instances_manage]$ cat alert.sh
+#!/bin/sh
+CATEGORY=$1
+if [ "$CATEGORY" == "" ]; then
+  MESSAGE="hello"
+elif [ $CATEGORY -eq 1 ]; then
+  MESSAGE="instances on"
+elif [ $CATEGORY -eq 0 ]; then
+  MESSAGE="instances off"
+else
+  MESSAGE="hello"
+fi
 
+curl -XPOST --data-urlencode "payload={\"channel\":\"#mta\", \"username\":\"webhookbot\", \"text\":\"${MESSAGE}\n\", \"icon_emoji\":\":ghost:\"}" \
+    https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+# slack notification url 은 따로 얻습니다
+```
 
+이 쉘은 위의 start-eks-instances.sh 및 stop-eks-instances.sh 에 다음과 같이 추가해 줍니다:
+```
+# start-eks-instances.sh 에는 다음 줄 추가
+/home/selee/instances_manage/alert.sh 1
+
+# stop-eks-instances.sh 에는 다음 줄 
+/home/selee/instances_manage/alert.sh 0
+```
 
