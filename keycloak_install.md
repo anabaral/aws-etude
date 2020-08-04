@@ -8,10 +8,13 @@ helm 을 이용한 설치를 하려고 보니 mariadb도 설치하는 등 많이
 ## 저장소 추가
 
 일단 저장소를 확인해 볼께요.
-<pre><code>$ helm search repo stable | grep keycloak
-stable/keycloak                         4.10.1          5.0.0                   DEPRECATED - Open Source Identity and Access Ma...
-$ helm search repo stable | grep mariadb
-stable/mariadb                          7.3.14          10.3.22                 DEPRECATED Fast, reliable, scalable, and easy t...
+<pre><code>$ helm repo add stable https://kubernetes-charts.storage.googleapis.com/   # almost default repo
+$ helm search repo stable/keycloak
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
+stable/keycloak 4.10.1          5.0.0           DEPRECATED - Open Source Identity and Access Ma...
+$ helm search repo stable/mariadb
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
+stable/mariadb  7.3.14          10.3.22         DEPRECATED Fast, reliable, scalable, and easy t...
 </code></pre>
 
 둘 다 DEPRECATED 상태네요.. 다음 명령어로 다른 저장소를 추가합니다.
@@ -22,14 +25,14 @@ $ helm repo add codecentric https://codecentric.github.io/helm-charts  # for key
 <pre><code>$ kubectl create ns keycloak</code></pre>
 
 mariadb 먼저 설치해 보죠.
-<pre><code>$ helm install keycloak-mariadb -n keycloak bitnami/mariadb --set global.storageClass=gp2 \
+<pre><code>$ helm install keycloak-mariadb -n mta-infra bitnami/mariadb --set global.storageClass=gp2 \
      --set db.name=keycloakdb  --set db.user=keycloak  --set db.password=keycloak
 #     --set master.persistence.mountPath=/opt/bitnami/mariadb
 #  마지막 한 줄은 불필요. 특정 버전의 이미지에서 문제가 되어 고쳤던 건데 현재는 오히려 기본값이어야 제대로 동작함 (스크립트에 박혀 있음) 
 
 NAME: keycloak-mariadb
 LAST DEPLOYED: Thu Jul  2 08:42:45 2020
-NAMESPACE: keycloak
+NAMESPACE: mta-infra
 STATUS: deployed
 REVISION: 1
 NOTES:
@@ -37,37 +40,37 @@ Please be patient while the chart is being deployed
 
 Tip:
 
-  Watch the deployment status using the command: kubectl get pods -w --namespace keycloak -l release=keycloak-mariadb
+  Watch the deployment status using the command: kubectl get pods -w --namespace mta-infra -l release=keycloak-mariadb
 
 Services:
 
-  echo Master: keycloak-mariadb.keycloak.svc.cluster.local:3306
-  echo Slave:  keycloak-mariadb-slave.keycloak.svc.cluster.local:3306
+  echo Master: keycloak-mariadb.mta-infra.svc.cluster.local:3306
+  echo Slave:  keycloak-mariadb-slave.mta-infra.svc.cluster.local:3306
 
  Administrator credentials:
 
    Username: root
-   Password : $(kubectl get secret --namespace keycloak keycloak-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 --decode)
+   Password : $(kubectl get secret --namespace mta-infra keycloak-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 --decode)
 
  To connect to your database:
 
    1. Run a pod that you can use as a client:
 
-       kubectl run keycloak-mariadb-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mariadb:10.3.23-debian-10-r44 --namespace keycloak --command -- bash
+       kubectl run keycloak-mariadb-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mariadb:10.3.23-debian-10-r44 --namespace mta-infra --command -- bash
 
    2. To connect to master service (read/write):
 
-       mysql -h keycloak-mariadb.keycloak.svc.cluster.local -uroot -p keycloakdb
+       mysql -h keycloak-mariadb.mta-infra.svc.cluster.local -uroot -p keycloakdb
 
    3. To connect to slave service (read-only):
 
-       mysql -h keycloak-mariadb-slave.keycloak.svc.cluster.local -uroot -p keycloakdb
+       mysql -h keycloak-mariadb-slave.mta-infra.svc.cluster.local -uroot -p keycloakdb
 
  To upgrade this helm chart:
 
    1. Obtain the password as described on the 'Administrator credentials' section and set the 'rootUser.password' parameter as shown below:
 
-       ROOT_PASSWORD=$(kubectl get secret --namespace keycloak keycloak-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 --decode)
+       ROOT_PASSWORD=$(kubectl get secret --namespace mta-infra keycloak-mariadb -o jsonpath="{.data.mariadb-root-password}" | base64 --decode)
         JeugQ3vIdM
        helm upgrade keycloak-mariadb bitnami/mariadb --set rootUser.password=$ROOT_PASSWORD
 </code></pre>
@@ -84,7 +87,7 @@ metadata:
   name: keycloak-storage-1
   labels:
     app: keycloak
-  namespace: keycloak
+  namespace: mta-infra
 spec:
   storageClassName: gp2
   accessModes:
@@ -103,7 +106,7 @@ keycloak:
   persistence:
     dbVendor: mariadb
     dbName: keycloakdb
-    dbHost: keycloak-mariadb.keycloak
+    dbHost: keycloak-mariadb.mta-infra
     dbPort: 3306
     dbUser: keycloak
     dbPassword: keycloak
@@ -125,10 +128,10 @@ keycloak:
 </pre></code>
 
 준비가 되었으니 설치합니다.
-<pre><code>helm install keycloak -n keycloak -f keycloak-values.yaml codecentric/keycloak
+<pre><code>helm install keycloak -n mta-infra -f keycloak-values.yaml codecentric/keycloak
 NAME: keycloak
 LAST DEPLOYED: Mon Jul 27 05:55:27 2020
-NAMESPACE: keycloak
+NAMESPACE: mta-infra
 STATUS: deployed
 REVISION: 1
 NOTES:
@@ -136,19 +139,19 @@ Keycloak can be accessed:
 
 * Within your cluster, at the following DNS name at port 80:
 
-  keycloak-http.keycloak.svc.cluster.local
+  keycloak-http.mta-infra.svc.cluster.local
 
 * From outside the cluster, run these commands in the same shell:
 
-  export POD_NAME=$(kubectl get pods --namespace keycloak -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
+  export POD_NAME=$(kubectl get pods --namespace mta-infra -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
   echo "Visit http://127.0.0.1:8080 to use Keycloak"
-  kubectl port-forward --namespace keycloak $POD_NAME 8080
+  kubectl port-forward --namespace keycmta-infraloak $POD_NAME 8080
 
 Login with the following credentials:
 Username: keycloak
 
 To retrieve the initial user password run:
-kubectl get secret --namespace keycloak keycloak-http -o jsonpath="{.data.password}" | base64 --decode; echo
+kubectl get secret --namespace mta-infra keycloak-http -o jsonpath="{.data.password}" | base64 --decode; echo
 
 </code></pre>
 
@@ -171,7 +174,7 @@ metadata:
   name: keycloak-theme-storage-1
   labels:
     app: keycloak
-  namespace: keycloak
+  namespace: mta-infra
 spec:
   storageClassName: gp2
   accessModes:
@@ -182,7 +185,7 @@ spec:
 $ kubectl apply -f keycloak-pvc.yaml
 persistentvolumeclaim/keycloak-theme-storage-1 created
 
-$ kubectl get statefulset -n keycloak keycloak -o yaml > keycloak-sts.yaml
+$ kubectl get statefulset -n mta-infra keycloak -o yaml > keycloak-sts.yaml
 $ vi keycloak-sts.yaml # 적당한 위치로 마운트 하기 위해
 ... resourceVersion, uid 같은 항목 삭제하고 
 spec:
@@ -217,10 +220,10 @@ $ kubectl apply -f keycloak-sts.yaml
 
 이제 테마를 추가해 보죠. 아래 예제는 제가 ci 라는 realm을 추가했다고 가정하고 진행한 것입니다.
 <pre><code>
-$ kubectl exec -n keycloak keycloak-0 -- mkdir /opt/jboss/keycloak/themes/ci
+$ kubectl exec -n mta-infra keycloak-0 -- mkdir /opt/jboss/keycloak/themes/ci
 $ git clone https://github.com/anabaral/alfresco-keycloak-theme
 $ cd alfresco-keycloak-theme/
-$ kubectl cp ./theme/login keycloak/keycloak-0:/opt/jboss/keycloak/themes/ci
+$ kubectl cp ./theme/login mta-infra/keycloak-0:/opt/jboss/keycloak/themes/ci
 </code></pre>
 여기까지 하면 keycloak UI 에 들어가서 ci realm 을 선택하고 Realm Settings 선택 - Themes 탭 선택 - Login Theme 항목에서 ci 를 선택할 수 있게 됩니다.
 혹은 개별 client 설정에서 Settings 탭 선택 - Login Theme 항목에서 선택할 수도 있습니다.
@@ -232,32 +235,32 @@ $ kubectl cp ./theme/login keycloak/keycloak-0:/opt/jboss/keycloak/themes/ci
 ## openldap 설치
 keycloak 만 설치한다고 다가 아니죠. ldap도 설치해야 합니다. 지난 번 PC virtualbox 기반 설치때도 helm을 사용했지만 이번엔 좀더 나아가 봅시다.
 영속성 부여도 아주 간단하게 됩니다.
-<pre><code>$ helm install openldap  --namespace  keycloak --set persistence.enabled=true --set persistence.storageClass=gp2 stable/openldap </code></pre>
+<pre><code>$ helm install openldap  --namespace  mta-infra --set persistence.enabled=true --set persistence.storageClass=gp2 stable/openldap </code></pre>
 
 메시지가 길게 나올텐데 이것만 기억하면 됩니다:
 <pre><code># 관리자 비밀번호 구하기: 
-kubectl get secret --namespace keycloak  openldap -o jsonpath="{.data.LDAP_ADMIN_PASSWORD}" | base64 --decode; echo
+kubectl get secret --namespace mta-infra  openldap -o jsonpath="{.data.LDAP_ADMIN_PASSWORD}" | base64 --decode; echo
 </code></pre>
 
 이걸 기억하기 까다로우면 위의 secret 내용을 다음과 같이 구해서 바꾸시면 됩니다:
 <pre><code>$ echo 'change_password_like_this' | base64
 <결과가텍스트로표시됨.이걸복사>
 
-$ kubectl edit secret -n keycloak openldap # vi편집창에서 .data.LDAP_ADMIN_PASSWORD 항목을 찾아 복사한 텍스트로 교체
+$ kubectl edit secret -n mta-infra openldap # vi편집창에서 .data.LDAP_ADMIN_PASSWORD 항목을 찾아 복사한 텍스트로 교체
 </code></pre>
 
 참고로, openldap을 재설치하거나 사용자/그룹에 변경이 있는 경우 keycloak에서 자동으로 동기화가 되는 것 같지 않습니다.
 keycloak 내의 각 realm의 User Federation 메뉴에서 [Synchronize all users] 같은 버튼으로 수동 동기화를 해줘야 합니다. 
 자동으로 될 필요도 있을 것 같은데 아직 방법을 못찾았습니다.
 
-여기까지 설치하면 openldap 에 사용자 등록하는 건 ldapadd 같은 툴을 사용하면 될 텐데, 배스티온 서버가 클러스터 내부 서버가 아니다 보니
+여기까지 설치하면 openldap 에 사용자 등록하는 건 ldapadd 같은 툴을 사용하면 될 텐데, 배스천 서버가 클러스터 내부 서버가 아니다 보니
 직접 접근해 관리하려면 NodePort를 열거나 Ingress를 만들거나.. phpldapadmin 같은 툴을 설치해야 합니다.
 여기서는 툴을 설치해 사용해 보죠. 
 
 지금까지 있던 helm 저장소에 phpldapadmin이 없네요.
 <pre><code>$ helm repo add cetic https://cetic.github.io/helm-charts  # for phpldapadmin</code></pre>
 설치합니다.
-<pre><code>$ helm install  phpldapadmin --namespace keycloak cetic/phpldapadmin --set env.PHPLDAPADMIN_LDAP_HOSTS=openldap.keycloak</code></pre>
+<pre><code>$ helm install  phpldapadmin --namespace mta-infra cetic/phpldapadmin --set env.PHPLDAPADMIN_LDAP_HOSTS=openldap.mta-infra</code></pre>
 이제 브라우저로 여기 붙어야 하는데 ingress 를 새로 만들려면 다음 설정을 사용합니다:
 <pre><code>$ cat phpldapadmin-ing.yaml
 apiVersion: extensions/v1beta1
@@ -269,7 +272,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/target-type: ip
     meta.helm.sh/release-name: phpldapadmin
-    meta.helm.sh/release-namespace: keycloak
+    meta.helm.sh/release-namespace: mta-infra
   generation: 1
   labels:
     app: phpldapadmin
@@ -278,7 +281,7 @@ metadata:
     heritage: Helm
     release: phpldapadmin
   name: phpldapadmin
-  namespace: keycloak
+  namespace: mta-infra
 spec:
   rules:
   - host: phpldapadmin.skmta.net
@@ -292,9 +295,11 @@ status:
   loadBalancer: {}
 </code></pre>
 
+## 비용절감을 위한 ingress 통합
+
 이렇게 하면 AWS 내에 ALB(=application load balancer)가 생성되죠. 여기 규칙을 잘 다듬은 후 Route53 에서 이 ALB를 지정하도록 설정하면 접속이 될 겁니다.
 그런데 이게 문제가 하나 있습니다. 다름아닌 비용인데요..
-ingress 하나 추가할 때마다 ALB가 하나씩 늘어나는데, 이 ALB가 존재하는 것만으로도 월 몇십 불 정도의 비용을 부과합니다. 
+ingress 하나 추가할 때마다 ALB가 하나씩 늘어나는데, 이 ALB가 존재하는 것만으로도 월 십몇 불 ~ 몇십 불 정도의 비용을 부과합니다. 
 대형 프로젝트라면 모를까 꼬꼬마 연구 프로젝트에선 이 비용도 큰 부담이라 살펴보니 같은 namespace 안에서는 ingress를 하나만 쓰면서도 host를 분리해 쓸 수 있더군요.
 그래서 위의 ingress 설정은 keycloak ingress 설정과 통합하게 됩니다.
 <pre><code>$ cat keycloak-ing.yaml
@@ -307,7 +312,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/target-type: ip
     meta.helm.sh/release-name: keycloak
-    meta.helm.sh/release-namespace: keycloak
+    meta.helm.sh/release-namespace: mta-infra
   creationTimestamp: "2020-07-02T09:59:15Z"
   generation: 1
   labels:
@@ -317,7 +322,7 @@ metadata:
     app.kubernetes.io/version: 10.0.0
     helm.sh/chart: keycloak-8.2.2
   name: keycloak
-  namespace: keycloak
+  namespace: mta-infra
 spec:
   rules:
   - host: keycloak.skmta.net
@@ -336,4 +341,4 @@ spec:
         path: /*
 </code></pre>
 
-
+나중에는 이 통합 설정파일을 gitea 에 등록하고 argocd 에서 싱크 시키는 방식으로 관리하게 됩니다.
