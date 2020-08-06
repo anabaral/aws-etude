@@ -37,6 +37,13 @@ NAME                          READY   STATUS     RESTARTS   AGE
 elasticsearch-test-master-0   0/1     Init:0/1   0          24s
 elasticsearch-test-master-1   0/1     Init:0/1   0          24s
 elasticsearch-test-master-2   0/1     Pending    0          24s  # 이건 노드 CPU/Mem 등이 모자라서 node scale up 을 하는 중이어서 대기중 
+
+$ kubectl describe po -n default elasticsearch-test-master-0 | tail -5
+  Type     Reason            Age        From                Message
+  ----     ------            ----       ----                -------
+  Warning  FailedScheduling  <unknown>  default-scheduler   0/4 nodes are available: 1 Insufficient memory, 2 node(s) didn't match node selector, 4 Insufficient cpu.
+  Warning  FailedScheduling  <unknown>  default-scheduler   0/4 nodes are available: 1 Insufficient memory, 2 node(s) didn't match node selector, 4 Insufficient cpu.
+  Normal   TriggeredScaleUp  99s        cluster-autoscaler  pod triggered scale-up: [{eksctl-mta-cluster-nodegroup-mta-mgmt-ng-NodeGroup-99D2CVRZ0VOS 2->3 (max: 3)}]
 ```
 
 결국 자원문제로 다음과 같이 바꿔 설치함
