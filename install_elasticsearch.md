@@ -39,6 +39,18 @@ elasticsearch-test-master-1   0/1     Init:0/1   0          24s
 elasticsearch-test-master-2   0/1     Pending    0          24s  # 이건 노드 CPU/Mem 등이 모자라서 node scale up 을 하는 중이어서 대기중 
 ```
 
+결국 자원문제로 다음과 같이 바꿔 설치함
+```
+$ cat elasticsearch-values.yaml
+clusterName: elasticsearch-test
+nodeSelector:
+  role: mgmt
+persistence:
+  enabled: true
+replicas: 1
+```
+
+
 이번엔 kibana 설치 차례임.
 ```
 $ cat kibana-values.yaml
