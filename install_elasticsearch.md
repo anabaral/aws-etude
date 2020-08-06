@@ -54,7 +54,12 @@ nodeSelector:
   role: mgmt
 persistence:
   enabled: true
-replicas: 1
+replicas: 2
+resources:
+  requests:
+    cpu: "500m"
+  limits:
+    cpu: "500m"
 ```
 
 
