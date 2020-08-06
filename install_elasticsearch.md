@@ -79,4 +79,6 @@ REVISION: 1
 TEST SUITE: None
 ```
 
+그러나 결국 다 지웠습니다. 
+애당초 kibana 의 SSO 구현을 생각하고 시도한 것인데 유료팩에 포함된 기능이네요..
 
