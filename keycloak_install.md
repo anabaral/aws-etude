@@ -303,6 +303,35 @@ status:
   loadBalancer: {}
 </code></pre>
 
+## keycloak에서 openldap 연동
+
+다음 순서로 연동을 진행합니다. 여기서 언급하는 이름들, 특히 따옴표("") 로 싸인 이름들은 다 예시이니 자신에게 맞는 값을 잘 선택해서 입력해야 합니다.
+
+1) "Dev" realm 을 선택
+2) User Federation 메뉴를 선택
+3) 최초 등록이면 ldap 을 추가하도록 선택합니다.
+4) ldap 정보 입력: Settings 탭에서
+  * Vendor: Other 선택, 몇가지 다른 값도 함께 정해집니다
+  * Connection URL: "ldap://openldap:389" (keycloak과 openldap이 같은 네임스페이스에 설치되었기에 이렇게 간단함)
+  * [Test connection] 버튼으로 연결 확인
+  * Users DN: "dc=example,dc=org"
+  * Bind DN: "cn=admin,dc=example,dc=org"
+  * Bind Credential: 위에 정해진, 혹은 정한 비번
+  * [Test authentication] 버튼으로 인증 확인
+  * 밑의 [Save] 버튼으로 저장
+  * [Synchronize changed users] 혹은 [Synchronize all users] 버튼으로 동기화
+  * 이 동기화는 자동으로 안되더군요. 혹 방법이 있을 수도 있지만 기본값으로는 변경 있을 때마다 해 주어야 합니다.
+
+다음은 부가적인 것입니다. 제 다른 프로젝트에서 js-console 예제를 띄워보셨다면 avatar_url 매핑을 추가하는 걸 아실 겁니다.
+
+* Settings 탭 옆에 Mappers 탭이 있을 겁니다.
+* 하나 적당히 [Create] 합니다
+  - name: avatar
+  - mapper type: user-attribute-ldap-mapper
+  - user model attribute: avatar_url
+  - ldap attribute: labeledURI (이건 ldap에서 이 이름으로 등록해 두었다고 가정)
+
+
 ## 비용절감을 위한 ingress 통합
 
 이렇게 하면 AWS 내에 ALB(=application load balancer)가 생성되죠. 여기 규칙을 잘 다듬은 후 Route53 에서 이 ALB를 지정하도록 설정하면 접속이 될 겁니다.
