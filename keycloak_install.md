@@ -233,6 +233,7 @@ $ kubectl cp ./theme/login mta-infra/keycloak-0:/opt/jboss/keycloak/themes/ci
 
 
 ## openldap 설치
+
 keycloak 만 설치한다고 다가 아니죠. ldap도 설치해야 합니다. 지난 번 PC virtualbox 기반 설치때도 helm을 사용했지만 이번엔 좀더 나아가 봅시다.
 영속성 부여도 아주 간단하게 됩니다.
 <pre><code>$ helm install openldap  --namespace  mta-infra --set persistence.enabled=true --set persistence.storageClass=gp2 stable/openldap </code></pre>
@@ -248,6 +249,13 @@ kubectl get secret --namespace mta-infra  openldap -o jsonpath="{.data.LDAP_ADMI
 
 $ kubectl edit secret -n mta-infra openldap # vi편집창에서 .data.LDAP_ADMIN_PASSWORD 항목을 찾아 복사한 텍스트로 교체
 </code></pre>
+
+혹은 이렇게 바꿀 수도 있습니다.
+```
+$ echo '암호' | base64
+<결과를기억>
+$ kubectl patch secret openldap -n mta-infra -p '{"data":{"LDAP_ADMIN_PASSWORD":"<기억한결과>"}}'
+```
 
 참고로, openldap을 재설치하거나 사용자/그룹에 변경이 있는 경우 keycloak에서 자동으로 동기화가 되는 것 같지 않습니다.
 keycloak 내의 각 realm의 User Federation 메뉴에서 [Synchronize all users] 같은 버튼으로 수동 동기화를 해줘야 합니다. 
