@@ -30,6 +30,8 @@ gitea 가 keycloak 인증으로 로그인 가능케 하려면 관리자가 다�
 ![login_form](https://github.com/anabaral/aws-etude/blob/master/gitea_openid_connect_form.png)
 아래의 버튼을 클릭하여 keycloak 제공하는 로그인 화면으로 넘어가면 성공.
 
+## 샘플 프로그램 js-console 준비
+
 ### keycloak 에 js-console 등록
 
 gitea에 등록할 만만한 프로젝트로 js-console 을 사용해 보겠습니다.
@@ -52,7 +54,8 @@ keycloak의 CORS 이슈 관련해서는 아래 그림에 간단히 적었습니�
 
 Installation 탭에서 
 - Format Option을 'Keycloak OIDC Json' 으로 선택하고 나오는 json 텍스트를 갈무리 해 둡니다.
-## gitea에 샘플 프로그램 js-console 등록
+
+### gitea에 js-console 등록
 
 이제 js-console을 gitea에 붓습니다.
 
@@ -88,7 +91,9 @@ $ git push origin master
 - js-console Deployment 파일 작성
 - js-console Service 파일 작성
 
-## Jenkinsfile 작성
+#### Jenkinsfile 작성
+
+Jenkinsfile은 jenkins 에서 jenkins pipeline 으로 활용되는 배포 기술문서입니다. 
 
 <pre><code>def label="jenkins-${UUID.randomUUID().toString()}"
 
@@ -153,7 +158,9 @@ podTemplate(label:label, serviceAccount: "jenkins-robot", namespace: "mta-cicd",
 아, 제가 말을 안했던가요? 클러스터용 private docker registry 가 있어야 해서 harbor 를 설치했었습니다.  
 그리고 위 내용을 보면 아시겠지만 아래 작성되는 js-console-deploy.yaml 과 js-console-svc.yaml 파일은 위 빌드배포 파이프라인에서 사용됩니다.
 
-## Deployment, Service 파일 작성
+#### Deployment, Service 파일 작성
+
+이 파일들은 kubernetes 에서 사용되는 배포 기술문서 및 서비스 기술문서입니다.
 
 js-console-deploy.yaml
 <pre><code>apiVersion: apps/v1
@@ -228,7 +235,10 @@ spec:
   type: NodePort
 </code></pre>
 
-## jenkins 프로젝트 설정
+## jenkins CI 설정
+
+이제 Jenkins에 작업을 등록하겠습니다.
+
 다음과 같이 설정합니다:
 * 로그인 후 홈 화면에서 '새로운 Item' 선택
 * item 이름을 'js-console' 로 정하고 유형은 Pipeline 으로 선택
