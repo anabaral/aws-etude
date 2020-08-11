@@ -35,6 +35,8 @@ persistence:
   그러나 keycloak + phpldapadmin 설치 때 언급했지만 비용절감을 위해 
   같은 namespace 안의 ingress들을 통합해야 하기 때문에 추가적인 일은 필요합니다.
 
+## 설치
+
 아무튼 설치해 봅시다:
 <pre><code>$ helm install jenkins -n mta-cicd -f jenkins-values.yaml stable/jenkins
 NAME: jenkins
@@ -62,6 +64,8 @@ https://jenkins.io/projects/jcasc/
 길게 설명 메시지가 나옵니다. 관리자(admin) 비번을 정하지 않았다면 여기에 비번을 얻는 방법이 기술됩니다.
 
 AWS Load balancer 및 Route53 설정을 끝내면 잠시 후 접속이 가능해집니다. (이건 따로 설명하지 않습니다)
+
+## 설정
 
 Jenkins에 로그인해서 우선 필요한 설정을 합니다:
 - Jenkins 관리 / 시스템 설정 으로 들어가
