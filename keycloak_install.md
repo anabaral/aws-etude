@@ -89,7 +89,7 @@ metadata:
     app: keycloak
   namespace: mta-infra
 spec:
-  storageClassName: gp2
+  storageClassName: elastic-sc # 새로 만든 storageClass, 과거의 기본값은 gp2   
   accessModes:
     - ReadWriteOnce
   resources:
