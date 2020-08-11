@@ -10,6 +10,7 @@
   + 같은 네임스페이스의 여러 인그레스를 하나로 통합관리하며 이를 Argo CD로 싱크하는 방법을 소개합니다.
 - [jenkins_and_gitea.md](https://github.com/anabaral/aws-etude/blob/master/jenkins_and_gitea.md)
   + 소스 저장소인 Gitea의 설정 (keycloak 연계를 위한 설정, Jenkins 연계를 위한 webhook 설정)
+  + 샘플 어플리케이션 js-console 등록 및 배포 준비
   + Jenkins pipeline의 구성 (Jenkinsfile)
 - [jenkins_install.md](https://github.com/anabaral/aws-etude/blob/master/jenkins_install.md)
   + CI 툴의 대표격인 Jenkins의 설치 방법을 기술합니다.
