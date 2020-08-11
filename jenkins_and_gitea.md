@@ -30,11 +30,31 @@ gitea 가 keycloak 인증으로 로그인 가능케 하려면 관리자가 다�
 ![login_form](https://github.com/anabaral/aws-etude/blob/master/gitea_openid_connect_form.png)
 아래의 버튼을 클릭하여 keycloak 제공하는 로그인 화면으로 넘어가면 성공.
 
-## gitea에 샘플 프로그램 등록
+### keycloak 에 js-console 등록
 
 gitea에 등록할 만만한 프로젝트로 js-console 을 사용해 보겠습니다.
 
-일단 배스티온에서 소스를 구해오고 git 정보를 지웁니다
+keycloak 에 dev realm이 없다면 추가하고, 그 안에 js-console 이라는 client를 생성합니다.
+Settings 탭에서 다음을 입력해 줍니다:
+- Client ID, Name : js-console
+- Login Theme: base
+- Client Protocol: openid-connect
+- Access type: public (이게 private면 CORS 문제가 불거지는데 어떻게 해결하는지 아직 모릅니다. 
+  처음에 js-console apache 설정에 ```Header set Access-Control-Allow-Origin: *``` 추가하는 걸로 접근했었는데 실제론 keycloak 에서 거부하는 거라 답이 아닌 것 같네요)
+- Root URL: http://js-console.skmta.net
+- Redirect URL: http://js-console.skmta.net/*
+- Admin URL: http://js-console.skmta.net
+- Web Origins: http://js-console.skmta.net (이게 keycloak에서 CORS 문제에 대처하는 데 쓰는 허용 URL입니다. 
+  이걸 제대로 입력해 줘도 Access type이 private면 실패)
+
+Installation 탭에서 
+- Format Option을 'Keycloak OIDC Json' 으로 선택하고 나오는 json 텍스트를 갈무리 해 둡니다.
+
+## gitea에 샘플 프로그램 js-console 등록
+
+이제 js-console을 gitea에 붓습니다.
+
+먼저 배스티온에서 소스를 구해오고 git 정보를 지웁니다
 <pre><code>$ git clone https://github.com/anabaral/keycloak-containers-demo/tree/master/js-console 
 $ rm -rf ./.git
 </code></pre>
@@ -54,19 +74,12 @@ $ git push origin master
 
   ADD src /usr/local/apache2/htdocs/
 
-  RUN (echo '' \
-    && echo ''  \
-    && echo '<VirtualHost *:80>'  \
-    && echo '    Header set Access-Control-Allow-Origin "*"' \
-    && echo '</VirtualHost>' ) >> /usr/local/apache2/conf/httpd.conf
   </code></pre>
-  다른 건 달라질 게 없고, 웹페이지에서 다른 도메인의 사이트 (keycloak 사이트)로부터 몇몇 파일을 호출해야 하는데 
-  그게 브라우저에 따라서는 CORS 위반으로 안받아집니다. 이걸 허용하려면 서버에서 "괜찮아 헤더" 를 보내줘야 합니다.
-  위의 RUN 구절이 그 역할을 담당합니다.
+
 - index.html
   <pre><code>https://keycloak.k8s.com:32443/... --> https://keycloak.skmta.net/...</code></pre>
 - keycloak.json
-  . keycloak 의 client 설정에서 얻을 수 있는 json 내용을 부으면 됩니다.
+  . keycloak 의 client 설정에서 갈무리해 둔 json 내용을 부으면 됩니다.
 
 이제 다음만 작성하면 끝(?)입니다.
 - Jenkinsfile 작성 (빌드 파이프라인)
