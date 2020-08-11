@@ -324,13 +324,23 @@ status:
 
 다음은 부가적인 것입니다. 제 다른 프로젝트에서 js-console 예제를 띄워보셨다면 avatar_url 매핑을 추가하는 걸 아실 겁니다.
 
-* Settings 탭 옆에 Mappers 탭이 있을 겁니다.
+* User Federation 메뉴에서 만들어 둔 ldap을 선택하면
+  Settings 탭 옆에 Mappers 탭이 있을 겁니다.
 * 하나 적당히 [Create] 합니다
   - name: avatar
   - mapper type: user-attribute-ldap-mapper
   - user model attribute: avatar_url
   - ldap attribute: labeledURI (이건 ldap에서 이 이름으로 등록해 두었다고 가정)
-
+* Synchronize all users 하고 사용자를 선택해 들어가면 Attribute 탭에서 avatar_url 항목이 추가된 것을 확인할 수 있습니다.
+* 이걸 다시 토큰에 전달하기 위해서는 Client 메뉴의 js-console 을 선택하고 Mapper 탭으로 들어갑니다.
+* [Create] 합니다.
+  - name: avatar
+  - mapper type: User Attribute
+  - User Attribute: avatar_url
+  - Token Claim Name: avatar_url
+  - Claim JSON Type: String
+  - 나머지는 기본값 (ID Token / Access Token에 추가)
+* 여기까지 저장이 되면 js-console 에서 로그인 (혹은 Refresh) 했을 때 (등록한 유저에 대해) 사진이 보일 겁니다.
 
 ## 비용절감을 위한 ingress 통합
 
