@@ -47,9 +47,11 @@ Settings 탭에서 다음을 입력해 줍니다:
 - Web Origins: http://js-console.skmta.net (이게 keycloak에서 CORS 문제에 대처하는 데 쓰는 허용 URL입니다. 
   이걸 제대로 입력해 줘도 Access type이 confidential이면 실패)
 
+keycloak의 CORS 이슈 관련해서는 아래 그림에 간단히 적었습니다. 상세한 설명은 저도 충분히는 모르고 구글링 하면 자료가 많으니 생략할게요.
+![CORS Issue](https://github.com/anabaral/aws-etude/blob/master/keycloak_CORS.png)
+
 Installation 탭에서 
 - Format Option을 'Keycloak OIDC Json' 으로 선택하고 나오는 json 텍스트를 갈무리 해 둡니다.
-
 ## gitea에 샘플 프로그램 js-console 등록
 
 이제 js-console을 gitea에 붓습니다.
