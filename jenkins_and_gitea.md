@@ -39,13 +39,13 @@ Settings 탭에서 다음을 입력해 줍니다:
 - Client ID, Name : js-console
 - Login Theme: base
 - Client Protocol: openid-connect
-- Access type: public (이게 private면 CORS 문제가 불거지는데 어떻게 해결하는지 아직 모릅니다. 
+- Access type: public (이게 confidential이면 CORS 문제가 불거지는데 어떻게 해결하는지 아직 모릅니다. 
   처음에 js-console apache 설정에 ```Header set Access-Control-Allow-Origin: *``` 추가하는 걸로 접근했었는데 실제론 keycloak 에서 거부하는 거라 답이 아닌 것 같네요)
 - Root URL: http://js-console.skmta.net
 - Redirect URL: http://js-console.skmta.net/*
 - Admin URL: http://js-console.skmta.net
 - Web Origins: http://js-console.skmta.net (이게 keycloak에서 CORS 문제에 대처하는 데 쓰는 허용 URL입니다. 
-  이걸 제대로 입력해 줘도 Access type이 private면 실패)
+  이걸 제대로 입력해 줘도 Access type이 confidential이면 실패)
 
 Installation 탭에서 
 - Format Option을 'Keycloak OIDC Json' 으로 선택하고 나오는 json 텍스트를 갈무리 해 둡니다.
