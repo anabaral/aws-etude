@@ -5,7 +5,7 @@
 
 * 네임스페이스 별로 하나 이상의 Ingress 설정이 가능합니다.
 * AWS에서 Ingress 하나 당 ALB (Application Load Balancer) 가 하나씩 만들어집니다.
-* AWS는 ALB 하나 당 과금을 합니다 (!!!) ALB의 과금량은 사용량을 무시할 때 월 몇십불 수준이므로 대규모 프로젝트에서는 무시할 수도 있겠지만 
+* 문제는 **AWS는 ALB 하나 당 과금을 한다는 점입니다** (!!!) ALB의 과금량은 사용량을 무시할 때 월 몇십불 수준이므로 대규모 프로젝트에서는 무시할 수도 있겠지만 
   개인이나 소규모 단위 프로젝트에서는 부담됩니다.
 
 이걸 해결해 주기 위해 우리는 '같은 네임스페이스의 Ingress들은 하나로 합치자' 는 결론에 도달했습니다.
@@ -17,12 +17,14 @@ $ kubectl get ingress -n our_namespace our_ingress -o yaml > our_ingress_ing.yam
 $ vi our_ingress_ing.yaml
 $ kubectl apply -f our_ingress_ing.yaml
 ```
-이 방식의 장점은 파일로 중간단계가 남기 때문에 히스토리 관리나 백업 등이 용이합니다. (파일명을 바꾸어 보관하거나 해서)<br>
 그리고 한 번 바꿀 때 생성되는 파일을 고쳐가면서 적용하게 되죠.
+
+이 방식의 장점은 파일로 중간단계가 남고 이를 파일명 변경 보관 등 활용해 히스토리 관리나 백업 등이 용이합니다.
 
 그러나 여러 사람들이 고칠 때는 이게 당연히 문제가 됩니다.
 내가 고친 ing 변경분이 어느 순간 남에 의해 덮어써질 수 있습니다.
-그 문제를 해결하는 방법 중 하나는 다음과 같은 직접 변경인데
+
+덮어쓰이는 문제를 해결하는 방법 중 하나는 다음과 같은 직접 변경인데
 ```
 $ kubectl edit ingress -n our_namespace our_ingress
 [ vi editor 가 열려 편집 가능 ]
