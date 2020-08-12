@@ -104,5 +104,8 @@ curl -XPOST --data-urlencode "payload={\"channel\":\"#mta\", \"username\":\"webh
 처음엔 이게 있는 줄 몰라서 위와 같이 쉘과 cron 으로 작업했는데 예약 작업 등록이 가능하다는 걸 안 후에
 등록을 시도했습니다만.. 2020년 8월 4일 현재 어쩐 일인지 등록한 게 실행이 되지 않아 부득이 CLI로 작업한 기존 것을 유지했습니다.
 
-뭐.. CLI 작업이 infrastructure as code 개념으로는 더 좋을 지도요.
+뭐.. CLI 작업도 장점이 있습니다.
+* infrastructure as code 개념으로는 더 좋을 수 있고
+* 현재 저는 쉘에 한 줄 추가해서 실행할 때마다 slack으로 알림을 보내도록 만들었는데 
+  위에처럼 제공되는 기능일 경우 이런 개선이 쉽지 않죠. 
 
