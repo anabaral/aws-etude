@@ -22,7 +22,8 @@ stable/mariadb  7.3.14          10.3.22         DEPRECATED Fast, reliable, scala
 $ helm repo add codecentric https://codecentric.github.io/helm-charts  # for keycloak</code></pre>
 
 ## mariadb 설치
-<pre><code>$ kubectl create ns keycloak</code></pre>
+
+'mta-infra' 라는 네임스페이스가 있다는 가정하에 작업합니다.
 
 mariadb 먼저 설치해 보죠.
 <pre><code>$ helm install keycloak-mariadb -n mta-infra bitnami/mariadb --set global.storageClass=gp2 \
