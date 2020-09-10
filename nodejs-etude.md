@@ -36,7 +36,7 @@ $ helm search repo node    # 'node' 라는 키워드로 뭐 깔게 있나 확인
   * 최종적으로는 우리도 gitea에 우리의 소스를 가져다 놓고 등록해서 쓸 수 있겠네.
 당장 아무 선택도 하지 말고 그냥 깔아보자.
 ```
-$ helm install mynode bitnami/node
+$ helm install mynode bitnami/node         # 혹시 기본 네임스페이스 설정 안했으면 -n <namespace> 옵션 추가. 
 coalesce.go:160: warning: skipped value for tolerations: Not a table.
 NAME: mynode
 LAST DEPLOYED: Thu Sep 10 06:57:52 2020
@@ -53,7 +53,7 @@ NOTES:
 
 근데 이 샘플 앱 엄청 큰 녀석인데... https://github.com/bitnami/sample-mean
 
-## PC 셋업
+## PC 에서 k8s 붙을 수 있게 셋업
 
 뜬금없지만 필요가 생겨서 넣음. Load Balancer 를 쓰지 않으면서 테스트를 손쉽게 하려면 
 위에 설치 메시지에 언급된 ```kubectl port-forward``` 를 활용해야 하는데
@@ -95,3 +95,21 @@ Default output format [None]: json
 * nodejs 를 거기를 바라보도록 설정해서 재설치
 * mariadb도 함 붙여보기
 
+# 삭제
+
+기본으로 설치했다면 제거는 단순하게 가능함.
+```
+$ helm delete mynode        # 아까 설치할 때 그 이름. 혹시 기본 네임스페이스 설정 안했으면 -n <namespace> 옵션 추가. 
+
+$ kubectl get pvc   # PV가 Retain 모드로 생성되었기에 안지워졌을 수 있음. 내용 보전한 채 다시 설치할 게 아니라면 직접 지워야 함. 
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mynode-mongodb   Bound    pvc-151663fa-4337-4b63-96f3-2ba1969c8dbf   8Gi        RWO            elastic-sc     59m
+$ kubectl delete pvc mynode-mongodb
+```
+참, 이 문서에서는 배스천에서 설치하고 나서 PC로 넘어왔기에 삭제는 배스천에서 하는 식으로 적었는데, 사실 PC에서 설치/제거 작업을 완성할 수도 있음.
+그럴 경우 PC에 helm repo 설정 다 해 주어야 함. (helm 이 윈도우에서 설치가 되는 것 같긴 한데 저도 안해봤습니다)
+
+네임스페이스도 깔끔하게 지우려면
+```
+$ kubectl delete ns selee
+```
