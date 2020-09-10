@@ -29,6 +29,7 @@ $ helm search repo node    # 'node' 라는 키워드로 뭐 깔게 있나 확인
 잘 뜯어보면 선택해야 할 것이 몇 가지 있음.
 - persistent volume 을 연결할 것인가 (기본은 불필요)
 - mongodb 차트를 설치할 것인가 (기본은 설치)
+  * 자동으로 8Gi 짜리 PVC를 생성하는데 이 사이즈를 어떻게 할까
 - 내가 만든 앱을 어떻게 깔 것인가
   * 그냥 설치하면 initContainer 가 git 클라이언트 역할을 해서 github에서 샘플 앱을 받아 ```/app``` 디렉터리에 넣음.
   * 이걸 그대로 실행하는 것임. 역시 신박하다.. 스크립트 언어의 위용.. 우리도 이렇게 하면 될 것 같다.
@@ -89,4 +90,8 @@ Default output format [None]: json
 
 ![샘플앱_초기화면](https://github.com/anabaral/aws-etude/blob/master/img/20200910_nodejs_sample_app_screen.png?raw=true)
 
+이제 남은 건 몇 가지 바꿔가면서 테스트해 보는 것.
+* 내 gitea project를 적당히 최소한의 구성으로 만들고 
+* nodejs 를 거기를 바라보도록 설정해서 재설치
+* mariadb도 함 붙여보기
 
