@@ -34,7 +34,8 @@ $ helm search repo node    # 'node' 라는 키워드로 뭐 깔게 있나 확인
   * 그냥 설치하면 initContainer 가 git 클라이언트 역할을 해서 github에서 샘플 앱을 받아 ```/app``` 디렉터리에 넣음.
   * 이걸 그대로 실행하는 것임. 역시 신박하다.. 스크립트 언어의 위용.. 우리도 이렇게 하면 될 것 같다.
   * 최종적으로는 우리도 gitea에 우리의 소스를 가져다 놓고 등록해서 쓸 수 있겠네.
-당장 아무 선택도 하지 말고 그냥 깔아보자.
+
+일단은(!) 아무 선택도 하지 말고 그냥 깔아보자.
 ```
 $ helm install mynode bitnami/node         # 혹시 기본 네임스페이스 설정 안했으면 -n <namespace> 옵션 추가. 
 coalesce.go:160: warning: skipped value for tolerations: Not a table.
