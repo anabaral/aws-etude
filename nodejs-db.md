@@ -10,7 +10,7 @@ MariaDB [my_database]> desc alert_mappings;
 | cluster      | varchar(50) | NO   | PRI | NULL    |       |
 | namespace    | varchar(50) | NO   | PRI | NULL    |       |
 | category     | varchar(20) | NO   | PRI | NULL    |       |
-| channel_name | varchar(30) | NO   | PRI | NULL    |       |
+| channel_name | varchar(50) | NO   | PRI | NULL    |       |
 | channel_type | varchar(30) | NO   | PRI | NULL    |       |
 | level        | varchar(8)  | NO   | PRI | NULL    |       |
 +--------------+-------------+------+-----+---------+-------+
@@ -20,7 +20,7 @@ MariaDB [my_database]> desc channel;
 | Field        | Type        | Null | Key | Default | Extra |
 +--------------+-------------+------+-----+---------+-------+
 | channel_type | varchar(30) | NO   | PRI | NULL    |       |
-| channel_name | varchar(30) | NO   | PRI | NULL    |       |
+| channel_name | varchar(50) | NO   | PRI | NULL    |       |
 | user_id      | varchar(10) | NO   | PRI | NULL    |       |
 | level        | varchar(5)  | YES  |     | NULL    |       |
 +--------------+-------------+------+-----+---------+-------+
@@ -50,7 +50,7 @@ MariaDB [my_database]> desc alert_summary;
 | alert_name   | varchar(100) | NO   | PRI | NULL    |       |
 | cluster      | varchar(50)  | NO   | PRI | NULL    |       |
 | namespace    | varchar(50)  | NO   | PRI | NULL    |       |
-| channel_name | varchar(30)  | YES  |     | NULL    |       |
+| channel_name | varchar(50)  | YES  |     | NULL    |       |
 | count        | int(11)      | YES  |     | NULL    |       |
 +--------------+--------------+------+-----+---------+-------+
 ```
@@ -99,3 +99,4 @@ value: "{"status":"firing","labels":{"alertname":"EKS-MonitoringHeartbeat","seve
 _id: "5f85679ef8b72f0014a0c396"
 }
 ```
+date 필드가 그냥 ```yyyy-MM-dd HH:mm:ss``` 형태의 문자열임.
