@@ -9,11 +9,14 @@
   var initOptions = {
         onLoad: 'login-required'
       };
-  kc.init(initOptions).then(function(authenticated) {
+  const kcPromise = new Promise(function(resolve, reject) {
+    kc.init(initOptions).then(function(authenticated) {
       if (!authenticated) {
           alert('Not authenticated');
+          reject('not authenticated');
       } else {
           kc.loadUserProfile();
+          resolve('authenticated');
           $(document).ready( function(){
             $(document.body).css("display","block");
           });
@@ -21,6 +24,7 @@
     }).catch(function() {
         alert('Init Error');
     });
+  });
 ```
 이 파일을 html 파일에 포함시키면 되는데, 문제는 이 로직의 실행이 document가 다 읽히기 전에 실행되어야 하지만 한편으로는 body 엘리먼트가 어느 정도 구성된 상태에서 실행되어야 하기도 하므로 (내부 로직에서 body 엘리먼트 안에 iframe을 삽입하더라) 보통 body의 끝 부분에 넣는다:
 ```
@@ -36,16 +40,34 @@
 이렇게 하면 html 자체에 대한 보안 처리가 된다. html 로드하는 시점에 미인증 상태이면 keycloak 사이트로 로그인하러 가며(=redirect),
 로그인 하고 나면 사용자 정보를 얻어오게 된다.
 
-여기서 조금 문제가 있는데, 나는 document.onLoad 시점에 서버로부터 정보를 얻어 초기화면을 구성하게 했는데, 이게 두 번 호출된다.
-* 미인증 상태에서의 첫 호출은 당연히 redirect하니까 결과가 있든 없든 무시되고 두번째 호출이 결과를 얻는다.
-* 그러나 인증하고 나서도 매번 keycloak 으로 인증했음을 확인하기 때문에, 인증 후에 화면 깜박임이 생긴다.
-* 위 문제는 일단 body를 안보이게 하고 위의 keycloak-init.js 에서 ```$(document.body).css("display","block");``` 코드로 
-  두번째 호출 결과만 보이게 했다. 이건 편법이긴 한데...
-* 이 편법을 쓰고 나서도 여전히 두 번 호출한다는 문제는 남아있다. 아마 document.load 시점에 구성하는 초기화면을 
-  document.load 조건과 인증 조건을 같이 충족할 때 구성하도록 고쳐야 제대로 동작할 것 같지만 두 동작이 다 비동기적으로 이루어지므로
-  아주 깔끔하게 처리하기가 쉽지 않다. 이건 시간 관계상 완전히 해결하지는 못했다.
+여기 코드의 특징을 좀 살펴보면 다음과 같다:
+* 인증을 얻은 후 작업과 document.load 후의 화면구성(render) 작업은 둘 다 callback 형태로 실행되는데,
+  성격상 인증과 document.load 가 다 완료된 후에 실행되어야 하는 작업이 있다. 서버에 요청해서 화면 구성에 필요한 데이터를 받는 작업이다.
+* 이걸 Promise 를 이용해 해결했다. 이걸 쓰지 않으면 
+  - 서버 요청 작업을 두 번 하고 첫 번째 작업은 버리거나
+  - 아예 인증을 얻지 못한 상태에서 서버에 요청을 하게 될 수도 있다.
+* 이것과는 별개로, 인증확인을 위해 keycloak에 호출하는 단계가 강제로(=인증 된 후에도) 들어가다 보니 
+  html 호출도 두 번 하게 되고 결과적으로 화면 깜박임이 발생했다.
+  - 이걸 해결해 주기 위해 HTML엔 ```<body style="display:none" > ``` 를 두어 처음엔 화면을 보이지 않다가
+    document.load 후에 ```$(document.body).css("display","block");``` 실행하는 식으로 넘겼다.
+  - 아마 제대로 하려면 인증확인을 redirect 없이 하고 미인증 시에만 redirect하는 방식을 도입해야겠다.
+    현재는 그것이 그것대로 연구가 필요한데 시간이 부족해서 통과.
 
-일단 화면은 인증만 되면 들어갈 수 있게 만들어 두었다. 나중엔 권한 체크도 필요하겠지..
+참고로 위에서 언급한 Promise 처리는 다음과 같이 했다:
+```
+  $(document).ready(function(){
+    kcPromise.then(function (){
+      $("#menu").load("/menu.html");
+      ...
+      render_XXXX(); // 서버에 요청해 데이터 받고 화면 그리는 로직 실행
+    }).catch(function(err){
+      console.log(err);
+    });
+  });
+```
+
+
+현재 권한 부여 및 체크는 없어서 인증만 되면 화면에 들어가 모든 작업을 실행할 수 있게 만들어 두었다. 나중엔 권한 체크도 필요하겠지..
 
 화면을 구성하는 방식은 다음 웹 개발 방식들 중 두 번째를 택했는데
 ![웹개발](https://github.com/anabaral/aws-etude/blob/master/img/web_dev_diagram.svg)
