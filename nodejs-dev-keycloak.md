@@ -78,9 +78,12 @@ app.use( keycloak.middleware() ); // 이 라인이 app.use(session({...})); 라�
 // 모듈로 분기할 때 패턴
 require('./app/alert-routes.js')(app,keycloak); // keycloak을 같이 보내야 모듈에서 사용
 // 바로 호출할 때, 혹은 모듈에서 호출할 때 패턴
+module.exports = function (app, keycloak) { // 모듈
+...
   app.get('/api/alert/get', keycloak.protect(), function (req, res) {
       getAlerts(req, res);
   });
+};
 ```
 위와 같이 ```keycloak.protect()``` 만 추가해 주면 인증되었을 때 실행되고 미인증 상태일 때는 403 에러를 낸다.
 
