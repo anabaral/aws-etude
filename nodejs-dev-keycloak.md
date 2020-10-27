@@ -2,8 +2,8 @@
 
 ## frontend
 
-전체적인 화면을 구성하는 방식은 다음 웹 개발 방식들 중 두 번째를 택했는데
-![웹개발](https://github.com/anabaral/aws-etude/blob/master/img/web_dev_diagram.svg)
+전체적인 화면을 구성하는 방식은 다음 웹 개발 방식들 중 두 번째를 택했는데  
+![웹개발](https://github.com/anabaral/aws-etude/blob/master/img/web_dev_diagram.svg)  
 이 방식에서는 서버에 Ajax를 통해 주요 정보를 받아오게 된다.
 
 ```keycloak-init.js``` 파일을 작성한다:
@@ -42,9 +42,8 @@
 ```
 
 이렇게 하면 html 자체에 대한 보안 처리가 된다. html 로드하는 시점에 미인증 상태이면 keycloak 사이트로 로그인하러 가며(=redirect),
-로그인 하고 나면 사용자 정보를 얻어오게 된다. 다음 그림과 같이:
+로그인 하고 나면 사용자 정보를 얻어오게 된다. 다음 그림과 같이:  
 ![HTML에서의 인증](https://github.com/anabaral/aws-etude/blob/master/img/keycloak_auth_html.svg)
-
 
 여기 코드의 특징을 좀 살펴보면 다음과 같다:
 * 인증을 얻은 후 작업과 document.load 후의 화면구성(render) 작업은 둘 다 callback 형태로 실행되는데,
