@@ -33,7 +33,7 @@ AWS 문서를 보면 다음과 같은 문구가 있던데 ( https://docs.aws.ama
 - elasticsearch의 경우, 시스템 파라미터 ```sysctl -w vm.max_map_count=262144``` 설정을 해 줘야 함.
   설치하신 분이 재설치하면서 이걸 실행하는 initContainer 설정을 누락했던 게 원인.  
   (일반적으로 docker 에서 자기를 띄운 VM의 시스템 파라미터를 고칠 수 없는데, privileged:true 모드로 띄우면 가능함)
-- mariadb의 경우, 파일 락을 많이 잡는 게 문제일 수 있음. 실제 ```lslocks``` 명령으로 확인해 보면 mariadb는 최소 100개 이상의 파일 락을 잡음.
+- mariadb의 경우, 파일 락을 많이 잡는 게 문제일 수 있음. 실제로 관련 VM에  ```lslocks``` 명령으로 확인해 보면 mariadb는 최소 100개 이상의 파일 락을 잡음.
   그러므로 비슷한 경쟁자와 같은 VM에 뜰 경우 문제를 일으키게 됨.
 
 
