@@ -2,6 +2,10 @@
 
 ## frontend
 
+전체적인 화면을 구성하는 방식은 다음 웹 개발 방식들 중 두 번째를 택했는데
+![웹개발](https://github.com/anabaral/aws-etude/blob/master/img/web_dev_diagram.svg)
+이 방식에서는 서버에 Ajax를 통해 주요 정보를 받아오게 된다.
+
 ```keycloak-init.js``` 파일을 작성한다:
 ```
   var login = {};
@@ -38,7 +42,9 @@
 ```
 
 이렇게 하면 html 자체에 대한 보안 처리가 된다. html 로드하는 시점에 미인증 상태이면 keycloak 사이트로 로그인하러 가며(=redirect),
-로그인 하고 나면 사용자 정보를 얻어오게 된다.
+로그인 하고 나면 사용자 정보를 얻어오게 된다. 다음 그림과 같이:
+![HTML에서의 인증](https://github.com/anabaral/aws-etude/blob/master/img/keycloak_auth_html.svg)
+
 
 여기 코드의 특징을 좀 살펴보면 다음과 같다:
 * 인증을 얻은 후 작업과 document.load 후의 화면구성(render) 작업은 둘 다 callback 형태로 실행되는데,
@@ -66,27 +72,23 @@
   });
 ```
 
-
 현재 권한 부여 및 체크는 없어서 인증만 되면 화면에 들어가 모든 작업을 실행할 수 있게 만들어 두었다. 나중엔 권한 체크도 필요하겠지..
 
-화면을 구성하는 방식은 다음 웹 개발 방식들 중 두 번째를 택했는데
-![웹개발](https://github.com/anabaral/aws-etude/blob/master/img/web_dev_diagram.svg)
-이 방식에서는 서버에 Ajax를 통해 주요 정보를 받아오게 된다.
-당연히 앞서 구현한 화면 보안 뿐 아니라 서버 사이드 보안도 필요하다. 이건 화면단에서의 구현도 필요한데 backend에서 같이 다루겠다.
+그런데 위의 다이어그램을 보면 데이터 요청할 때의 인증, 즉 서버 사이드 인증은 빠져 있다. 이는 다음 backend에서 다룬다.
 
 ## backend 
 
 아래 사이트를 참조했는데.. 실제 설명이 아주 충분하지는 않아서 애 좀 먹었다:
 https://www.keycloak.org/docs/latest/securing_apps/#_nodejs_adapter
 
-일단 
+아래 소스는 서버사이드 nodejs 스크립트 일부이다:
 ```
 var express = require('express');
 var session = require('express-session');
 var Keycloak = require("keycloak-connect"); // SSO
 var memoryStore = new session.MemoryStore();
 var kcConfig = JSON.parse(fs.readFileSync('public/keycloak.json')); // 이렇게 주지 않으면 server.js 와 같은 위치에 파일이 있어야 해서 파일 두개 필요
-kcConfig['bearerOnly'] = 'true';                                    // 이건 꼭 필요한 건지 불확실
+kcConfig['bearerOnly'] = 'true';                                    // 이건 꼭 필요한 건지 불확실했는데, 필요한 것 같음.
 var keycloak = new Keycloak({ store: memoryStore }, kcConfig);
 ...
 app.use(session({
@@ -126,12 +128,13 @@ module.exports = function (app, keycloak) { // 모듈
 
 ### keycloak-connect 버그
 
-확실히 버그인지, 아니면 내가 뭔가 잘못한 건지는 알 수 없지만 이런 문제가 있다:
+앞의 backend 인증에서 ```kcConfig['bearerOnly'] = 'true';  ``` 코드가 필요한 것 같다고 했는데 그 이유를 기술한다.
+이 코드가 없으면서 미인증 상태인 경우 아마도 로그인 화면으로 보내는 모양인데 그 과정에서 아래와 같은 오류가 뜬다.
 ```
 Chrome 콘솔에서 뜨는 메시지:
 Access to XMLHttpRequest at 'https://keycloak.skmta.net/auth/realms/dev/protocol/openid-connect/auth?client_id=mta-manage-log&state=70e9c859-a13f-4a4a-8947-5d1c5674d0df&redirect_uri=http%3A%2F%2Fmynode-selee.skmta.net%2Fapi%2Falert_summary%2Fget%3Ffrom_dt%3D2020102000%26auth_callback%3D1&scope=openid&response_type=code' (redirected from 'https://mynode-selee.skmta.net/api/alert_summary/get?from_dt=2020102000') from origin 'https://mynode-selee.skmta.net' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
-처음에는 그냥 일반적인 CORS 문제라고 보고 keycloak의 CORS(Web Origin) 설정과 nodejs 에서의 설정을 찾아보았지만
+처음에는 그냥 일반적인 CORS 문제라고 보고 keycloak의 CORS(Web Origin) 설정과 nodejs 에서의 설정을 찾아보았지만 별 이상이 없었고
 결국 전혀 다른 곳에서 원인을 발견해 버렸다.
 
 https://github.com/keycloak/keycloak-nodejs-connect/blob/master/middleware/check-sso.js 이나<br>
@@ -144,18 +147,14 @@ https://github.com/keycloak/keycloak-nodejs-connect/blob/master/middleware/prote
 ```
 같은 구절이 있는데, 이게 서버사이드 요청에 대한 리다이렉트를 결정한다.
 
-그런데 리다이렉트를 하면 무조건 protocol이 http 로 정해져 버린다.
+그런데 리다이렉트를 하면 무조건 protocol이 http 로 정해져 버린다. 위의 Chrome 콘솔을 잘 보면 redirect_uri 값이 그러하다.  
 왜냐하면 다음 구조 때문.
 ```
+※ 현재 호출의 구조는 외부에서 https redirect까지 해서 https를 강제하지만 L4 안쪽은 http 통신을 하게 됨. 즉
 [https_req] ----> ingress / L4 ----> [http_req] ----> real_app
 ```
-그러면 위의 코드는 ```real_app``` 에게 전달되는 요청만을 분석하기 때문에 https 값이 올 수 없고,
+그러면 위의 코드는 ```real_app``` 에게 전달되는 요청만을 분석하기 때문에 https 값이 올 수 없고,  
 브라우저는 http로 시작하는 redirect uri 를 받게 된다.
 
-즉 redirect 시키는 구조는 어차피 안됨.
-
-bearer-only 모드로 다시 도전해 봐야겠다.
-
-
-
+즉 redirect 시키는 구조는 현재로선 아예 쓰지 않아야 할 것 같다.
 
