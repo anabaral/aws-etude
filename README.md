@@ -28,3 +28,5 @@
     * 개발 어플리케이션은 keycloak 인증을 거쳐야 접근 가능하도록 하였는데 이 때 겪은 것들을 기술합니다.
   + [nodejs-dev.md](https://github.com/anabaral/aws-etude/blob/master/nodejs-dev.md)
     * 어플리케이션 개발 관련 이야기들을 적었습니다.
+- [troubleshootings.md](https://github.com/anabaral/aws-etude/blob/master/troubleshootings.md)
+  + 다른 문서에서 다루기 애매하지만 많이 고생했던 트러블과 그 해결기를 다룹니다.
