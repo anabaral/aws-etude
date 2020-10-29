@@ -2,9 +2,85 @@
 
 [nodejs 개발연습 문서](https://github.com/anabaral/aws-etude/blob/master/nodejs-etude.md) 를 좀더 발전시켜 실 개발을 해보자.
 
-소스는 https://gitea.skmta.net/selee/nodejs-etude 여기에서 관리했는데, stage-1...stage-10 까지 개발해 가면서 어느 정도 완성할 때마다 master로 합쳤음.
+
+
 
 개발 과정에서 경험한 것들을 두서없이 나열하고 나중에 정리할 예정.
+
+
+## 환경구성 및 시작
+
+앞서 개발연습 문서를 보면 이 패키지는 GitOps로 유지된다. 특히 Git repository로부터 실행할 소스를 받아 실행되는 독특한 구조를 가진다.  
+여기서는 이 소스 위치를 내 소스로 바꾸어 실행했고 https://gitea.skmta.net/selee/nodejs-etude 에서 관리했는데, 
+브랜치를 stage-1...stage-10 까지 개발해 가면서 어느 정도 완성할 때마다 master로 합쳤다.
+
+다만 이 저장소는 2020-11월 현재 사라질 예정이라서.. 백업한 master만 여기 다른 프로젝트로 (private로) 올릴 생각이다.
+(내용이 별건 없지만 회사 비용으로 개발한 셈이므로..)
+
+Deployment는 그렇게 구성하면 되는데, 소스는 그대로 재활용할 수는 없으니 일단 server.js 를 만들어 간단한 테스트를 마치고
+그 이후에 앞서의 샘플 소스가 무슨 구조로 무슨 기능을 하는지 보면서 작업했다. 대략 훑어보면
+- https://github.com/bitnami/sample-mean
+- 서버쪽은 당연히 nodejs 가 돌고 있고
+- 서버에서 하는 일은 
+  * 웹 페이지 한장 (index.html) 과 CSS/JS 등을 서비스하고
+  * 요청이 오면 작업 후 json 응답을 되돌리는 것.
+- 요청을 보내는 브라우저 단의 역할은 index.html 과 JS 에서 맡는데
+  * AngularJS 를 사용하고 있다...
+  * AngularJS가 강력하긴 하지만 베이스를 모르고 다루기엔 좀 학습시간이 많이 필요한데..
+
+그래서 결국 AngularJS는 적용 안하기로. 처음 시작할 당시에는 나 혼자 개발할 거로 생각 안했기에 더더욱 피했다.
+
+일단 쉬운 시작부터..
+
+server.js 를 적당히 만들어 보자. Hello World 라도..
+
+```
+// Setup
+var express = require('express');
+var port = process.env.BACKEND_PORT || process.env.PORT || 3000;  // set the port from envs, fallback to 3000
+var morgan = require('morgan');
+var bodyParser = require('body-parser');
+
+const app =express();
+
+app.get('/', function (req, res) {
+  res.send('<html><body><h1>Hello, World!</h1></body></html>');
+});
+
+app.listen(port);
+```
+처음 소스 상태는 이랬음.
+
+소스 커밋/푸쉬 하고
+
+```
+$ kubectl edit -n selee mynode  # git clone 대목만 내 걸로 바꾸어 주자
+...
+          git clone https://gitea.skmta.net/selee/nodejs-etude --branch master /app
+        #  git clone https://github.com/bitnami/sample-mean.git --branch master /app
+...
+```
+
+바꾸고 나면 바로 재기동 뜨는데, 실패하네? 쩝
+원인이 뭐지..
+```
+$ kubectl logs mynode-85f8f9c8d7-2vsjc
+...
+npm ERR! path /app/package.json
+npm ERR! errno -2
+npm ERR! enoent ENOENT: no such file or directory, open '/app/package.json'
+...
+```
+아.. 그 파일이 필요한 거였구나.
+
+위에서 ```/app/package.json``` 이라는 위치는 더 위에서 ```git clone ...... /app``` 하고 관련이 있겠지.
+루트(server.js 가 있는 위치)에 두는 게 맞다.
+
+가져다 두고 커밋/푸쉬.
+
+다시 시도하니까.. 된다!
+<br>(실제로는 kubectl port-forward를 재시작해 주었음. 이게 필수적인 지는 확실지 않은데 에러가 나서..)
+
 
 
 ## 개발패턴
