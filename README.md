@@ -28,5 +28,9 @@
     * 개발 어플리케이션은 keycloak 인증을 거쳐야 접근 가능하도록 하였는데 이 때 겪은 것들을 기술합니다.
   + [nodejs-dev.md](https://github.com/anabaral/aws-etude/blob/master/nodejs-dev.md)
     * 어플리케이션 개발 관련 이야기들을 적었습니다.
+- [shells.md](https://github.com/anabaral/aws-etude/blob/master/shells.md)
+  + 필요해서 임시로 만들었던 쉘들을 기록합니다.
+- [wordpress_keycloak.md](https://github.com/anabaral/aws-etude/blob/master/wordpress_keycloak.md)
+  + wordpress 플러그인 설치하여 keycloak OIDC 설정하는 방법을 다룹니다.
 - [troubleshootings.md](https://github.com/anabaral/aws-etude/blob/master/troubleshootings.md)
   + 다른 문서에서 다루기 애매하지만 많이 고생했던 트러블과 그 해결기를 다룹니다.
