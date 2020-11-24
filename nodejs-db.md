@@ -54,6 +54,50 @@ MariaDB [my_database]> desc alert_summary;
 | count        | int(11)      | YES  |     | NULL    |       |
 +--------------+--------------+------+-----+---------+-------+
 ```
+create table 스크립트로는 다음과 같음 (예전에 만든 걸 백업하는 거라, 만약 위와 아래가 내용이 다르다면 위의 것이 맞을 것임.)
+```
+
+create table alert_mappings(
+  cluster       varchar(50) ,
+  namespace     varchar(50) ,
+  category      varchar(20) ,
+  channel_name  varchar(30) ,
+  channel_type  varchar(30)	,
+  level         varchar(5),
+  primary key(cluster, namespace, category, channel_name)
+);
+
+create table namespace(
+  cluster    varchar(50) ,
+  namespace  varchar(50) ,
+  user_id    varchar(10) ,
+  primary key (cluster, namespace, user_id)
+);
+
+create table channel (
+  channel_type  varchar(30),
+  channel_name  varchar(30),
+  user_id       varchar(10),
+  level         varchar(5),
+  primary key (channel_type, channel_name, user_id)
+);
+
+create table user(
+  user_id    varchar(10),
+  user_name  varchar(30),
+  primary key (user_id)
+);
+
+create table alert_summary (
+    date            varchar (10), 
+    alert_name      varchar (100), 
+    cluster         varchar (50), 
+    namespace       varchar (50), 
+    channel_name    varchar (30), 
+    count    integer, 
+  primary key ( date, alert_name, cluster, namespace ) 
+);
+```
 
 ## mta-admin mongodb scheme
 ```
