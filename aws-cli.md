@@ -24,9 +24,11 @@ Default output format [None]: 그냥엔터                                 <-- j
 > aws eks help
 ```
 
-### AWS EKS 클러스터 셋업
+## AWS EKS 클러스터 셋업
 
-다음을 참조하는데 100% 따라하지는 않게 될 것 같음:
+먼저 AWS에서 전형적으로 하게 되는 VPC / Subnet / 기타등등 을 셋업해 보겠습니다.
+
+다음을 참조하고 있습니다:
 https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.html
 - 위 링크는 cloudformation 으로 VPC 나 subnet들을 생성하고 인터넷 연결 등을 설정하는데 기본적으로 갖출 것을 갖추고 있음.
 - ```
@@ -38,27 +40,62 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
   }
   ```
   이렇게 한 것만으로 VPC 를 포함한 리소스들이 만들어집니다.
-  * VPC 1개
+  * VPC 1개 (AWS::EC2::VPC)
   * Subnet 4개 (AWS::EC2::Subnet)
     - public subnet 2개
     - private subnet 2개
-  * 라우팅 테이블 4개 (AWS::EC2::RouteTable)
-    - 기본 1개 (그냥 자동으로 존재하는..? cloudformation 에서는 기술되지 않음)
+    - cloudformation 기술자를 보면 Subnet은 VPC에 종속됩니다  
+      ```
+        PublicSubnet01:
+          Type: AWS::EC2::Subnet
+          ...
+          Properties:
+            ...
+            VpcId:
+              Ref: VPC
+      ```
+  * 라우트 테이블 4개 (AWS::EC2::RouteTable)
+    - 기본 1개 (cloudformation 기술자에는 안보이는 걸로 보아 VPC 생성 시 기본으로 만들어지는 것인 듯)
     - Public 1개가 2개의 public subnet에 연결
+      * subnet 메뉴에서 보이는 라우팅 테이블이 바로 이것
     - Private 2개가 각기 하나씩 private subnet에 연결
-    - (cloudformation 상에선 연결 도 하나의 개체 -- AWS::EC2::SubnetRouteTableAssociation -- 로 취급해서 4개의 연결이 선언되어 있음)
+    - cloudformation 기술자엔 이 연결에 해당하는 개체 AWS::EC2::SubnetRouteTableAssociation 4개가 선언되어 있음
     - outbound 통신을 위해 Gateway 들과 연결 (이 연결도 개체 -- AWS::EC2::Route )
-      * public 라우팅테이블은 인터넷 게이트웨이와 연결
-      * private 라우팅테이블들은 하나씩 NATGateway와 연결
+      * public 라우트 테이블은 인터넷 게이트웨이와 연결
+      * private 라우트 테이블들은 하나씩 NATGateway와 연결
+    - cloudformation 기술자를 보면 라우트 테이블은 VPC에 종속됩니다  
+      ```
+        PublicRouteTable:
+          Type: AWS::EC2::RouteTable
+          Properties:
+            VpcId: !Ref VPC     # VPC ID 를 속성으로 가짐
+      ```
+  * 라우트 (AWS::EC2::Route)
+    - DestinationCidrBlock 속성을 가지며, 웹콘솔에서 라우팅테이블 정보에 해당함
+    - 성격상 라우트테이블 정보의 한 Row 정도로 보는 게 맞을 듯
+    - public 1개
+      * RouteTableId 속성, GatewayId 속성을 가져 둘을 연결함
+    - private 2개
+      * RouteTableId 속성, NatGatewayId 속성을 가져 둘을 연결함
   * 인터넷 게이트웨이 1개 (AWS::EC2::InternetGateway)
     - public 라우팅테이블과 연결
-    - cloudformation 상에선 AWS::EC2::VPCGatewayAttachment 개체와 연결되어 있음. 이 개체가 다른 개체와의 연결을 구성.
+    - cloudformation 상에선 VPC와 연결되어 있는데  
+      그 사이를 잇는 개체로 AWS::EC2::VPCGatewayAttachment 가 존재
   * EIP 2개 (AWS::EC2::EIP)
-    - 각기 하나씩 NATGateway에 할당
+    - 각기 하나씩 NATGateway에 할당되어 있음  
+      (cloudformation 기술자 상에선 NATGateway가 EIP를 가리키는(의존하는) 것으로 되어 있음)
   * NATGateway 2개 (AWS::EC2::NatGateway)
     - 각기 하나씩 public subnet 안에 존재하면서
-    - 각기 하나씩 private subnet 과 연결되어 있음 (라우팅 테이블 / 라우트 로) 
+    - 각기 하나씩 private subnet 과 연결되어 있음 (라우트 테이블 / 라우트 로) 
   * Network ACL 1개
     - 4개의 subnet에 연결
   * 보안 그룹 1개 (AWS::EC2::SecurityGroup)
+    - cloudformation 기술자를 보면 VPC에 종속되는 개체임이 보임:
+      ```
+        ControlPlaneSecurityGroup:
+          Type: AWS::EC2::SecurityGroup
+          Properties:
+            GroupDescription: Cluster communication with worker nodes
+            VpcId: !Ref VPC
+      ```
 
