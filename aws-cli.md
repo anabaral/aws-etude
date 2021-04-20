@@ -24,7 +24,7 @@ Default output format [None]: 그냥엔터                                 <-- j
 > aws eks help
 ```
 
-## AWS EKS 클러스터 셋업
+## AWS EKS 클러스터 준비
 
 먼저 AWS에서 전형적으로 하게 되는 VPC / Subnet / 기타등등 을 셋업해 보겠습니다.
 
@@ -98,4 +98,34 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
             GroupDescription: Cluster communication with worker nodes
             VpcId: !Ref VPC
       ```
+
+## AWS EKS 클러스터 권한 준비
+
+다음을 실행합니다. (Windows Command 가정)
+```
+> copy con cluster-role-trust-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+^Z
+```
+이걸 가지고 역할을 생성하고
+```
+> aws iam create-role --role-name ds04226-eks-cluster-role --assume-role-policy-document file://"cluster-role-trust-policy.json"
+```
+(이 상태까지는 웹콘솔에서 보면 정책을 연결해야 한다고 나옵니다)  
+여기에 EKS관리용 정책을 부여하라고 하네요.
+```
+> aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy --role-name ds04226-eks-cluster-role
+```
+
 
