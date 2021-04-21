@@ -118,7 +118,8 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
 }
 ^Z
 ```
-이걸 가지고 역할을 생성하고
+이건 그냥 빈 껍데기 같습니다. 아닐 수도 있지만  
+암튼 이걸 가지고 역할을 생성하고
 ```
 > aws iam create-role --role-name ds04226-eks-cluster-role --assume-role-policy-document file://"cluster-role-trust-policy.json"
 ```
