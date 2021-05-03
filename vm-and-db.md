@@ -21,7 +21,8 @@ AWS에서 Kubernetes 만들어 쓰거나 VM 하나 만들어 쓰는 데만 익�
 Aurora DB 를  serverless 로 만듭니다.  
 * 비용절감 옵션을 선택할 수 있던데 저는 5분 넘어가면 중지 모드로 가게 했습니다.  
 * 당연히 DB는 private subnet에 생성합니다.
-* 저는 VM에서 DB에 붙게 할 겁니다.
+* 최종적으로는 lambda에서 DB에 붙게 할 것인데,
+  그 전에 테이블을 만든다든지 해야 하므로 우선 VM에서 DB에 붙게 할 겁니다.
 
 ## VM과 DB 연결
 
