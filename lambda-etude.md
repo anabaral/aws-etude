@@ -54,3 +54,28 @@ lambda 화면으로 이동
   ...
   ```
   
+
+# 람다함수에 세부 기능 추가하면서 테스트
+
+2021-05-04 세부기능 추가 중
+
+serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능함.  
+(아니면 db가 public open 되거나...)
+
+쉽게 가기 위해 같은 VPC에 넣으려는데 에러가 난다.  
+`The provided execution role does not have permissions to call CreateNetworkInterface on EC2`
+이걸 풀려면 다음 권한이 필요한데
+- "ec2:DescribeNetworkInterfaces"
+- "ec2:CreateNetworkInterface"
+찾아보니 예전에 lambda를 위해 만든 역할(여기서는 arn:aws:iam::592806604814:role/service-role/ds04226-lambda-1)을 찾아 여기에 정책을 더하면 됨.
+- AWSLambdaVPCAccessExecutionRole
+이 정책에 위의 두 권한도 포함되어 있음.
+
+
+
+
+
+
+
+
+
