@@ -57,7 +57,7 @@ lambda 화면으로 이동
 
 # 람다함수에 세부 기능 추가하면서 테스트
 
-2021-05-04 세부기능 추가 중
+## 권한 조정
 
 serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능함.  
 (아니면 db가 public open 되거나...)
@@ -70,6 +70,15 @@ serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능�
 찾아보니 예전에 lambda를 위해 만든 역할(여기서는 arn:aws:iam::592806604814:role/service-role/ds04226-lambda-1)을 찾아 여기에 정책을 더하면 됨.
 - AWSLambdaVPCAccessExecutionRole
 이 정책에 위의 두 권한도 포함되어 있음.
+
+## sts 문제: 아직 해결 못함
+
+실행할 때 다음 코드에서 멈추다가 타임아웃 됨.
+```sts_identity = boto3.client('sts').get_caller_identity()```
+API 문서 찾아보니 다음 권한 얘기가 있는데, 한편으론 없어도 될 것처럼 나와서 고민중.
+sts:GetCallerIdentity
+
+일단은 그냥 상수값으로 부여함.
 
 
 
