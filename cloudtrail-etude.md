@@ -36,6 +36,11 @@ stop_events = client.lookup_events(
 events = start_events['Events'] + stop_events['Events']
 for ev in events:
     print (f"{ev['EventName']} : {ev['Resources']}  at {ev['EventTime']}")
+
+# 결과
+StartInstances : [{'ResourceType': 'AWS::EC2::Instance', 'ResourceName': 'i-0b096a3e9ba3eb624'}]  at 2021-05-06 10:08:24+09:00
+...
+StopInstances : [{'ResourceType': 'AWS::EC2::Instance', 'ResourceName': 'i-02420ac5ff612cf71'}]  at 2021-05-03 00:19:34+09:00
 ```
 
 EventName 에는 StartInstances, StopInstances 말고도 StartInstance, StopInstance 가 있던데, 이 역시 쓰이는 지는 모르겠습니다.
