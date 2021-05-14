@@ -83,6 +83,8 @@ lambda 화면으로 이동
 
 ## 권한 조정
 
+### DB 접근 관련 권한
+
 serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능함.  
 (아니면 db가 public open 되거나...)
 
@@ -94,6 +96,44 @@ serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능�
 찾아보니 예전에 lambda를 위해 만든 역할(여기서는 arn:aws:iam::592806604814:role/service-role/ds04226-lambda-1)을 찾아 여기에 정책을 더하면 됨.
 - AWSLambdaVPCAccessExecutionRole
 이 정책에 위의 두 권한도 포함되어 있음.
+
+### EC2 시작/중지 권한
+
+이상하게 중지가 오래 걸리고 3분 이상 줘도 timeout 걸림. 늦어도 1분 안에 끝나야 하는데.
+
+다음 권한을 만들어서 (주어진 정책에서 안찾아져서) 추가함.
+- 이름: EC2StartStopRole
+- 내용:
+  ```
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ec2:Start*",
+          "ec2:Stop*"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+  ```
+- 전체 정책들은 (아마도 만들 때 주어졌던 정책까지 합쳐) 다음 4개임 (2021-05-14)
+  * AWSLambdaVPCAccessExecutionRole
+  * EC2StartStopRole
+  * AWSLambdaTestHarnessExecutionRole-8d8313fb-e016-4b81-bd07-954751e891b5
+  * AWSLambdaBasicExecutionRole-72e67c3a-85c3-4c3c-9f8c-558f00960905
+
 
 ## sts 문제: 아직 해결 못함
 
