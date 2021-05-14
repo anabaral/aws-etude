@@ -12,9 +12,24 @@ lambda 화면으로 이동
   import boto3
   #import pprint
   import json
-
-  # 이것저것 테스트하고 최종적으로 만들었던 것. cron실행할 거라 리턴할 게 없음.
+  
+  
   def lambda_handler(event, context):
+      #ec2_client = boto3.client('ec2', region_name='ap-northeast-2')
+      # (copied from ds05599 lambda function)
+      #filters_Name_ds05599=[{
+      #            'Name':'tag:owner',
+      #            'Values':['ds05599']
+      #        }]
+      #        
+      #instances = ec2_client.describe_instances(Filters=filters_Name_ds05599)
+      #inst_ids = instances['Reservations'][0]['Instances'][0]['InstanceId']
+      #ec2_client.start_instances(InstanceIds=[inst_ids])
+      #ec2_client.stop_instances(InstanceIds=[inst_ids])
+      
+      # 이 샘플 프로그램의 목적은 정해진 시각마다 실행되면서
+      # - 실행되는 시각을 얻고 확인
+      # - 추가로 그 시각에 하기로 한 무언가를 확인
       print(f"{event['time']} 에 시작 혹은 종료될 뭔가를 찾아요")
       print(f"""context:\n name={context.function_name} , version={context.function_version} , 
                 mem_lim={context.memory_limit_in_mb} , context_id={context.identity.cognito_identity_id} ,
@@ -22,6 +37,15 @@ lambda 화면으로 이동
                 client_context={context.client_context} , 
              """
           )
+      #    f"str(context.cognito_identity_id) , {context.cognito_identity_pool_id} , " + 
+      #    f"{context.client_context}"
+      #     )
+      #return {
+      #    'statusCode': 200,
+      #    'body': {"event": json.dumps(event), "context": json.dumps(context) }
+      #}
+  
+  
   ```
 - 트리거 추가
   * 타입: EventBridge(Cloudwatch Events)
