@@ -152,6 +152,17 @@ sts:GetCallerIdentity
 ```
 권한 문제가 아니고 접속 문제였어..?
 
+좀 검색해 보니, lambda를 VPC 안에 둘 경우 해야 할 것이 있는 듯 함.
+* https://stackoverflow.com/questions/58717176/lambda-in-vpc-cannot-connect-to-aws-services
+* lambda가 속한 VPC에 연결된 엔드포인트로 가서 그것이 가지고 있는 보안그룹을 찾아 그 설정에 '이 lambda로부터의 접속을 허함' 이라 해 줘야 한다고..
+* 나는 lambda가 가지는 보안그룹과 이 엔드포인트의 보안그룹이 같으므로 거기에 설정하면 충분함. (mariadb 보안그룹도 같네 그러고 보니...)
+  근데 무슨 접속을 허해야 하지? '모든 TCP'를? 생각하다 일단 HTTPS만 허가했는데 안되고, 모든TCP 허용해도 안됨.
+* 테스트로 다음 코드를 실행해 봤는데 에러가 남
+  ```
+  print(urllib.request.urlopen('https://wikipedia.com').read())
+  ==>
+  [ERROR] URLError: <urlopen error [Errno 97] Address family not supported by protocol> Traceback (most recent call last):
+  ```
 
 
 
