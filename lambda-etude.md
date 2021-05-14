@@ -145,8 +145,12 @@ sts:GetCallerIdentity
 일단은 그냥 상수값으로 부여함.
 
 
+## timeout 문제 : 아직 해결 못함
 
-
+```
+2021-05-14T23:05:43.374+09:00	[ERROR] ConnectTimeoutError: Connect timeout on endpoint URL: "https://ec2.ap-northeast-2.amazonaws.com/"
+```
+권한 문제가 아니고 접속 문제였어..?
 
 
 
