@@ -163,6 +163,21 @@ sts:GetCallerIdentity
   ==>
   [ERROR] URLError: <urlopen error [Errno 97] Address family not supported by protocol> Traceback (most recent call last):
   ```
+* 문제의 원인을 찾은 것 같음. 
+  - 링크: https://stackoverflow.com/questions/52992085/why-cant-an-aws-lambda-function-inside-a-public-subnet-in-a-vpc-connect-to-the
+  - 내용 일부:
+    > The reason that your Lambda function cannot access the internet, even though the Lambda function is attached to a public subnet of your VPC, 
+    > is that Lambda functions do not, and cannot, have public IP addresses. You cannot send traffic to the internet, 
+    > which happens via the VPC's Internet Gateway, unless you have a public IP.
+    > 즉 람다 함수는 public ip를 가지지 못하므로..
+  - 결국 NAT Gateway를 연결시켜 줘야 함. 만들어 놓은 것은 있는데 라우트테이블 설정상 
+    람다가 private subnet으로 옮기는게 자연스럽기에 결국 옮김.
+  - 람다가 다른 security group 에 얹혀 쓰이고 있었는데 별도의 SG를 만들어 줘야 함 (아웃바운드 규칙을 완전 별개로 줘야 하므로)
+  - auroradb 가 속한 security group에서도 람다의 SG로부터의 접속을 허용해 줘야 하고 람다로부터의 아웃바운드도 마찬가지
+  - 결국 성공. 실행 시간도 몇 초 안 걸린다.
+
+
+
 
 
 
