@@ -145,7 +145,7 @@ sts:GetCallerIdentity
 일단은 그냥 상수값으로 부여함.
 
 
-## timeout 문제 : 아직 해결 못함
+## timeout 문제 
 
 ```
 2021-05-14T23:05:43.374+09:00	[ERROR] ConnectTimeoutError: Connect timeout on endpoint URL: "https://ec2.ap-northeast-2.amazonaws.com/"
@@ -176,8 +176,15 @@ sts:GetCallerIdentity
   - auroradb 가 속한 security group에서도 람다의 SG로부터의 접속을 허용해 줘야 하고 람다로부터의 아웃바운드도 마찬가지
   - 결국 성공. 실행 시간도 몇 초 안 걸린다.
 
-
-
+* 대략 문제를 정리하면 다음과 같음:
+  - 람다함수가 갖춰야 할 조건:
+    + 만들어 둔 DB에 붙어야 한다.
+    + 지정한 VM을 중지/기동 할 수 있어야 한다.
+  - 시도들을 그림으로 그림:  
+    ![람다함수_배포시도](./img/res_sched_lambda_control.svg)
+    + 시도-1 : VPC 없이 람다를 띄우기 --> DB를 붙이려면 DB접속을 VPC 밖으로 공개해야 함. 이건 좀 아니다 싶음.
+    + 시도-2 : VPC의 public subnet에 람다를 띄우기 --> 람다가 public ip를 갖지 못하는 제약때문에 인터넷 접속(=VPC 밖으로의 통신)이 불가능해짐.
+    + 시도-3 : VPC의 private subnet에 람다를 띄우기 --> 성공. 대신 라우팅테이블, 보안그룹, NAT Gateway 설정 등 여러 군데를 손봐야 함.
 
 
 
