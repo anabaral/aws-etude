@@ -196,8 +196,7 @@ sts:GetCallerIdentity
 
 ## TO-DO
 
-위에 권한 부여를 위해 기존에 있는 정책으로 추가하다가 안되어서 custom 정책을 생성했는데, 이걸 다시 정리해서 이 람다만의 custom 정책을 다시 만들어야겠음.
-
-
+* 위에 권한 부여를 위해 기존에 있는 정책으로 추가하다가 안되어서 custom 정책을 생성했는데, 이걸 다시 정리해서 이 람다만의 custom 정책을 다시 만들어야겠음.
+* 위의 경험을 바탕으로 회사에서 쓰이는 기능인 [cloudadaptor 리소스 스케줄 기능](https://github.com/opmdash/cloudadaptor/blob/selee/doc/aws-res-sched-conceptual.md) -- 주의! Private Project -- 에 써야겠음
 
 
