@@ -81,12 +81,19 @@ lambda 화면으로 이동
 
 # 람다함수에 세부 기능 추가하면서 테스트
 
+## EKS 셋업
+
+[eks셋업](https://github.com/anabaral/aws-etude/blob/master/aws-cli.md) 에서 만들었던 VPC를 그대로 사용하기로 함.
+
+
 ## 권한 조정
 
 ### DB 접근 관련 권한
 
-serverless aurora db 에 붙이려니 lambda 함수를 VPC에 넣어야 가능함.  
-(아니면 db가 public open 되거나...)
+serverless aurora db 에 붙이려니 제약이 있어서
+- 이 글 제일 밑에 그림에 설명됨
+- lambda 함수를 VPC에 넣는게 나을 걸로 판단.  
+- 다른 대안은 db를 public open 해야 하는데 그건 좀 아닌 걸로 판단.
 
 쉽게 가기 위해 같은 VPC에 넣으려는데 에러가 난다.  
 `The provided execution role does not have permissions to call CreateNetworkInterface on EC2`
@@ -185,6 +192,11 @@ sts:GetCallerIdentity
     + 시도-1 : VPC 없이 람다를 띄우기 --> DB를 붙이려면 DB접속을 VPC 밖으로 공개해야 함. 이건 좀 아니다 싶음.
     + 시도-2 : VPC의 public subnet에 람다를 띄우기 --> 람다가 public ip를 갖지 못하는 제약때문에 인터넷 접속(=VPC 밖으로의 통신)이 불가능해짐.
     + 시도-3 : VPC의 private subnet에 람다를 띄우기 --> 성공. 대신 라우팅테이블, 보안그룹, NAT Gateway 설정 등 여러 군데를 손봐야 함.
+
+
+## TO-DO
+
+위에 권한 부여를 위해 기존에 있는 정책으로 추가하다가 안되어서 custom 정책을 생성했는데, 이걸 다시 정리해서 이 람다만의 custom 정책을 다시 만들어야겠음.
 
 
 
