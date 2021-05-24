@@ -3,6 +3,12 @@
 2021-03-26 테스트하면서 남긴것들 끌어모음..
 
 
+
+## 일정 시각마다 실행하는 람다함수 만들기
+
+
+### 기본 구성
+
 lambda 화면으로 이동
 함수 블레이드 클릭
 함수 생성 버튼 클릭
@@ -59,8 +65,12 @@ lambda 화면으로 이동
 - 대상
   * 비워둠. (이건 람다 연쇄적 실행하려고 할 때 쓰이는 것 같음)
   
+### 기능 추가
 
-- 람다함수에 boto3 실행을 위한 레이어 추가하기
+- 람다함수에 레이어 추가하기
+  * 다음 기능들이 필요하여 추가 레이어로 넣습니다.
+    - boto3 실행을 위한 기능
+    - mariadb 접근을 위한 기능
   * 일반적인 가상머신이나 컨테이너라면 그 안에 파이썬 라이브러리를 설치하면 될 것이지만, 람다는 그렇게 못하므로
     어떤 라이브러리를 사용하고 싶다면 두 가지 정도의 접근이 필요합니다.
     - 내가 만든 람다함수 코드를 라이브러리와 함께 말아서 올리는 식으로 디플로이
@@ -70,6 +80,7 @@ lambda 화면으로 이동
   D:\>mkdir python_tmp
   D:\>cd python_tmp
   D:\python_tmp>mkdir python
+  D:\python_tmp>pip3 install pymysql -t python
   D:\python_tmp>pip3 install boto3 -t python
   D:\python_tmp>"c:\Program Files\7-Zip\7z.exe" a ..\boto3-layer.zip .
   D:\python_tmp>aws lambda publish-layer-version --layer-name boto3-layer --zip-file fileb://d:\boto3-layer.zip
@@ -77,18 +88,17 @@ lambda 화면으로 이동
       "LayerVersionArn": "arn:aws:lambda:ap-northeast-2:592806604814:layer:boto3-layer:1",
   ...
   ```
-  
+  * 유지보수를 보다 잘하려면 pymysql 과 boto3 레이어를 분리하는 게 맞겠지만 귀찮으니 패스.
 
-# 람다함수에 세부 기능 추가하면서 테스트
 
-## EKS 셋업
+### EKS 셋업
 
 [eks셋업](https://github.com/anabaral/aws-etude/blob/master/aws-cli.md) 에서 만들었던 VPC를 그대로 사용하기로 함.
 
 
-## 권한 조정
+### 권한 조정
 
-### DB 접근 관련 권한
+#### DB 접근 관련 권한
 
 serverless aurora db 에 붙이려니 제약이 있어서
 - 이 글 제일 밑에 그림에 설명됨
@@ -104,7 +114,7 @@ serverless aurora db 에 붙이려니 제약이 있어서
 - AWSLambdaVPCAccessExecutionRole
 이 정책에 위의 두 권한도 포함되어 있음.
 
-### EC2 시작/중지 권한
+#### EC2 시작/중지 권한
 
 이상하게 중지가 오래 걸리고 3분 이상 줘도 timeout 걸림. 늦어도 1분 안에 끝나야 하는데.
 
@@ -141,18 +151,19 @@ serverless aurora db 에 붙이려니 제약이 있어서
   * AWSLambdaTestHarnessExecutionRole-8d8313fb-e016-4b81-bd07-954751e891b5
   * AWSLambdaBasicExecutionRole-72e67c3a-85c3-4c3c-9f8c-558f00960905
 
+### TroubleShooting
 
-## sts 문제: 아직 해결 못함
+#### sts 문제
 
 실행할 때 다음 코드에서 멈추다가 타임아웃 됨.
 ```sts_identity = boto3.client('sts').get_caller_identity()```
 API 문서 찾아보니 다음 권한 얘기가 있는데, 한편으론 없어도 될 것처럼 나와서 고민중.
 sts:GetCallerIdentity
 
-일단은 그냥 상수값으로 부여함.
+일단은 그냥 상수값으로 부여했는데, 아래의 다른 문제를 보니 접속 문제일 지도 모르곘음.
 
 
-## timeout 문제 
+#### timeout 문제 
 
 ```
 2021-05-14T23:05:43.374+09:00	[ERROR] ConnectTimeoutError: Connect timeout on endpoint URL: "https://ec2.ap-northeast-2.amazonaws.com/"
@@ -194,9 +205,61 @@ sts:GetCallerIdentity
     + 시도-3 : VPC의 private subnet에 람다를 띄우기 --> 성공. 대신 라우팅테이블, 보안그룹, NAT Gateway 설정 등 여러 군데를 손봐야 함.
 
 
-## TO-DO
+### TO-DO
 
 * 위에 권한 부여를 위해 기존에 있는 정책으로 추가하다가 안되어서 custom 정책을 생성했는데, 이걸 다시 정리해서 이 람다만의 custom 정책을 다시 만들어야겠음.
 * 위의 경험을 바탕으로 회사에서 쓰이는 기능인 [cloudadaptor 리소스 스케줄 기능](https://github.com/opmdash/cloudadaptor/blob/selee/doc/aws-res-sched-conceptual.md) -- 주의! Private Project -- 에 써야겠음
+
+
+
+
+
+## 이번엔 호출 기반 람다함수 구성해 보자.
+
+
+### 기본 구성
+
+만드는 것은 위의 '일정시각마다 실행하는' 람다함수와 유사하며, 다만 Cloudwatch Event를 추가할 필요는 없음.
+
+처음 구상할 때는 URL 을 오픈해서 람다를 호출할 생각을 했으나, 람다함수를 호출하는 AWS REST API와 boto3 api 가 있음을 알게 되면서 
+그냥 이 기능을 쓰는 게 낫겠다고 생각함.
+
+처음에 HelloWorld 구성으로 람다를 생성하였으며, 다만 생성 위치는 위에 기술된 VPC의 Private Subnet 으로 하였음.
+처음 생성되어 있는 코드는 다음과 같음.
+```
+import json
+
+def lambda_handler(event, context):
+    # TODO implement
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
+
+```
+호출 테스트는 이 코드만으로 충분하므로 일단 이걸 그대로 두겠음.
+
+
+### 기능 추가
+
+람다함수에 boto3 실행을 위한 레이어 추가하기... 는 위의 람다에서 한 그대로를 추가함. (이 레이어에는 boto3 는 불필요한데 ~~귀찮아서~~ 혹시 몰라서)
+
+### 호출 테스트
+
+호출코드는다음과 같음.
+```
+import boto3
+client = boto3.client("lambda")
+response = client.invoke(FunctionName="ds04226-rs-schedule-manager", InvocationType="RequestResponse", LogType="Tail", 
+      Payload=('{ "schedule_id": 11,   "user_id": "jxxx15",   "instance_id": "i-0b096a88888888624",   "sch_case": "A", "type": "week", '
+               '  "date": "0,1,2,3,4",   "time": "2130",   "onoff": -1,   "period_yn": "N",   "period_from": null,   "period_to": null}' ),
+               Qualifier="1" )
+print( response['Payload'].read() )
+```
+위의 Payload는 실제 보낼 json 인데 여기서는 의미 없음.  
+실행은 잘 된걸로 나옴.
+
+
+
 
 
