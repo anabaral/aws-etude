@@ -145,3 +145,32 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
 ```
 
 
+## kubectl 연결
+
+`kubectl` 이 설치되어 있다고 가정합니다.
+
+다음 명령으로 어떤 클러스터가 현재 존재하는지 확인합니다:
+```
+> aws eks list-clusters --region ap-northeast-2
+{
+    "clusters": [
+        "<cluster-name-1>",
+        "<cluster-name-2>",
+        ...
+    ]
+}
+```
+
+
+다음 명령으로 접속권한(접속을 위한 키 등등)을 얻습니다:
+```
+> aws eks update-kubeconfig --region ap-northeast-2 --name <cluster-name>
+Added new context arn:aws:eks:ap-northeast-2:011122223337:cluster/<cluster-name> to C:\Users\Administrator\.kube\config
+```
+
+다음 명령으로 이를 확인하고 접근할 클러스터를 선택할 수 있습니다:
+```
+> kubectl config get-contexts
+> kubectl config use-context 
+```
+
