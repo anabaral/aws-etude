@@ -144,6 +144,17 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
 > aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy --role-name ds04226-eks-cluster-role
 ```
 
+이렇게 주고 나서 웹 콘솔 IAM 화면에서 만든 역할을 확인해 보면 다음과 같이 나옵니다:
+
+![권한 탭](./img/aws-iam-role-01.png)  
+부여한 정책이 보입니다.
+
+![신뢰 관계 탭](./img/aws-iam-role-02.png)  
+앞서 허용한 서비스가 신뢰할 수 있는 개체로서 표시됩니다.
+
+![액세스 관리자 탭](./img/aws-iam-role-03.png)  
+부여한 `AmazonEKSDClusterPolicy` 정책에서 따라오는 다섯 개의 서비스가 접근 허용되어 있습니다.
+
 
 ## kubectl 연결
 
