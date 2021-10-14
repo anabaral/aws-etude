@@ -113,6 +113,9 @@ https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/getting-started-console.h
             GroupDescription: Cluster communication with worker nodes
             VpcId: !Ref VPC
       ```
+- 참고로 Cloudformation 특징을 간단히 그려봤습니다. (모두 테스트해 보고 쓴 건 아니라 나중에 교정할 수 있음)
+  ![Cloudformation 대충 설명해보기](./img/aws-cloudformation-conceptual.svg)
+
 
 ## AWS EKS 클러스터 권한 준비
 
