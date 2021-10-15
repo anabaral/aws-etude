@@ -188,3 +188,31 @@ Added new context arn:aws:eks:ap-northeast-2:011122223337:cluster/<cluster-name>
 > kubectl config use-context 
 ```
 
+
+## Persistence 를 위한 설정
+
+참조링크: https://aws.amazon.com/ko/premiumsupport/knowledge-center/eks-persistent-storage/  
+(주의할 것은 여기 있는 것도 그대로 실행하면 안됨. 이를테면 github url 이 요새 쓰는 형식이 아님. 해보면 압니다)
+
+EBS와 EFS중 방식 선택해야 하는데 가용성 측면에서 강점이 있는 EFS를 선택합니다.
+위 링크의 문서에선 [옵션 B: Amazon EFS CSI 드라이버 배포 및 테스트] 부분입니다.
+
+먼저 정책 하나를 만들고
+```
+# curl 이 안깔려 있으면 브라우저로 받으면 됨
+> curl -o iam-policy-aws-efs-csi-driver.json https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-driver/v1.2.0/docs/iam-policy-example.json
+
+> aws iam create-policy --policy-name AmazonEKS_EFS_CSI_Driver_Policy --policy-document file://iam-policy-aws-efs-csi-driver.json
+```
+
+다음엔 oidc provider url을 얻고 account_id 와 함께 사용해 또다른 정책을 생성합니다.
+```
+> aws eks describe-cluster --name your_cluster_name --query "cluster.identity.oidc.issuer" --output text
+https://oidc.eks.ap-northeast-2.amazonaws.com/id/3FAA................9792
+```
+
+
+
+
+
+
